@@ -1,5 +1,7 @@
 using DainnStripe;
+using DainnStripe.Data;
 using DainnUser.Infrastructure;
+using DainnUser.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Mindlex.Data;
 using Mindlex.Services;
@@ -47,6 +49,58 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
+
+// Apply EF Core schema setup on startup so seeders can query their tables.
+//
+// DainnUser / DainnStripe migrations from the upstream packages are broken on
+// PostgreSQL (their `InsertDataOperation` seed rows mis-type Guid as string,
+// blowing up NpgsqlMigrationsSqlGenerator). Until those libs are patched we
+// fall back to `EnsureCreatedAsync` for them — it builds the schema directly
+// from the EF model and skips the bad seed inserts entirely. RoleSeeder /
+// AdminSeeder below populate the rows we actually need.
+//
+// MindlexDbContext is our own and has clean migrations, so it still uses
+// `MigrateAsync` to keep history-table tracking working.
+using (var scope = app.Services.CreateScope())
+{
+    var sp = scope.ServiceProvider;
+    var logger = sp.GetRequiredService<ILoggerFactory>().CreateLogger("Migrations");
+
+    async Task EnsureCreatedAsync<TCtx>() where TCtx : DbContext
+    {
+        try
+        {
+            var ctx = sp.GetRequiredService<TCtx>();
+            var created = await ctx.Database.EnsureCreatedAsync();
+            logger.LogInformation("{Context}: schema {Status}",
+                typeof(TCtx).Name, created ? "created" : "already present");
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Failed to EnsureCreated {Context}", typeof(TCtx).Name);
+            throw;
+        }
+    }
+
+    async Task MigrateAsync<TCtx>() where TCtx : DbContext
+    {
+        try
+        {
+            var ctx = sp.GetRequiredService<TCtx>();
+            await ctx.Database.MigrateAsync();
+            logger.LogInformation("Migrated {Context}", typeof(TCtx).Name);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Failed to migrate {Context}", typeof(TCtx).Name);
+            throw;
+        }
+    }
+
+    await EnsureCreatedAsync<DainnUserDbContext>();
+    await EnsureCreatedAsync<DainnStripeDbContext>();
+    await MigrateAsync<MindlexDbContext>();
+}
 
 if (app.Environment.IsDevelopment())
 {

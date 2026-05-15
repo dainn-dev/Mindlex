@@ -28,9 +28,9 @@ export function PublicLayout() {
         <Outlet />
       </main>
       <footer className="bg-navy-900 px-4 md:px-6 py-5 text-xs text-slate-300 text-center">
-        \u00a9 {year} MINDLEX LIMITED \u00b7{" "}
-        <Link to="/terms" className="text-gold mx-2">{t("footer.terms")}</Link>\u00b7
-        <Link to="/privacy" className="text-gold mx-2">{t("footer.privacy")}</Link>\u00b7
+        © {year} MINDLEX LIMITED ·{" "}
+        <Link to="/terms" className="text-gold mx-2">{t("footer.terms")}</Link>·
+        <Link to="/privacy" className="text-gold mx-2">{t("footer.privacy")}</Link>·
         <Link to="/usage" className="text-gold mx-2">{t("footer.usage")}</Link>
       </footer>
     </div>

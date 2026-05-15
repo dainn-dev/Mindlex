@@ -1,4 +1,4 @@
-// LC1 + LC6 + DC1 + DD1 \u2014 Composer: input, tone toggle, mode dropdown, file upload
+// LC1 + LC6 + DC1 + DD1 — Composer: input, tone toggle, mode dropdown, file upload
 import { KeyboardEvent, useRef, useState } from "react";
 import { Paperclip, Send, X, ChevronDown } from "lucide-react";
 import { Dropdown } from "@/components/ui/Dropdown";
@@ -91,7 +91,7 @@ export function ChatComposer({
           onChange={(e) => setText(e.target.value)}
           onKeyDown={onKey}
           rows={1}
-          placeholder="Ask a legal question or upload a document for compliance check\u2026"
+          placeholder="Ask a legal question or upload a document for compliance check…"
           className="flex-1 bg-transparent resize-none outline-none text-sm py-2 max-h-32"
           disabled={disabled}
         />

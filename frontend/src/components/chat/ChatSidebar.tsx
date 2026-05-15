@@ -1,4 +1,4 @@
-// LC8 \u2014 Chat history threads sidebar
+// LC8 — Chat history threads sidebar
 import { useEffect, useState } from "react";
 import { Plus, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
 import { api } from "@/lib/api";
@@ -34,7 +34,7 @@ export function ChatSidebar({ activeId, onSelect, onNew, mobileOpen, onMobileClo
   const rename = async (id: string) => {
     const trimmed = editValue.trim();
     if (!trimmed || trimmed.length > 30) {
-      showToast("warn", "Title must be 1\u201330 characters.");
+      showToast("warn", "Title must be 1–30 characters.");
       return;
     }
     try {

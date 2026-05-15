@@ -1,0 +1,77 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: mindlex-postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: mindlex
+    # Host port is configurable to avoid collisions with an existing local
+    # Postgres install. Container port is always 5432 (backend uses the
+    # service name `postgres:5432` over the compose network, unaffected).
+    ports:
+      - "${POSTGRES_HOST_PORT:-55432}:5432"
+    volumes:
+      - mindlex_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d mindlex"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      # NuGet auth — only needed if DainnStripe / DainnUser come from
+      # a private feed. Pass values via .env (NUGET_FEED_URL, NUGET_USERNAME,
+      # NUGET_PAT) or skip if packages are public.
+      args:
+        NUGET_FEED_URL: ${NUGET_FEED_URL:-}
+        NUGET_USERNAME: ${NUGET_USERNAME:-}
+        NUGET_PAT:      ${NUGET_PAT:-}
+    container_name: mindlex-backend
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://+:8080
+      # Override connection strings to point at the postgres service.
+      ConnectionStrings__Mindlex: "Host=postgres;Port=5432;Database=mindlex;Username=postgres;Password=postgres"
+      ConnectionStrings__DainnStripe: "Host=postgres;Port=5432;Database=mindlex;Username=postgres;Password=postgres"
+      DainnUser__Database__ConnectionString: "Host=postgres;Port=5432;Database=mindlex;Username=postgres;Password=postgres"
+      DainnStripe__Database__ConnectionString: "Host=postgres;Port=5432;Database=mindlex;Username=postgres;Password=postgres"
+      # Optional secrets — leave blank to disable feature
+      DainnUser__Jwt__Secret: ${JWT_SECRET:-dev-only-not-for-production-please-replace-32chars}
+      # Default values are Stripe's own well-known test placeholders — they
+      # let the app boot in dev, but every Stripe call will return 401.
+      # Replace with real keys in .env for real billing flows.
+      DainnStripe__SecretKey: ${STRIPE_SECRET:-stripe_placeholder_not_a_real_key}
+      DainnStripe__WebhookSigningSecret: ${STRIPE_WEBHOOK_SECRET:-whsec_dev_placeholder_replace_me_in_env_file_for_real_webhooks}
+      # Seed an admin account on first boot (AdminSeeder skips entries with
+      # blank passwords). The default password meets PasswordComplexityAttribute
+      # (>=8 chars, digit, uppercase, special). Override via .env.
+      Mindlex__Admins__0__FullName: ${ADMIN_FULLNAME:-Mindlex Dev Admin}
+      Mindlex__Admins__0__Email: ${ADMIN_EMAIL:-admin@mindlex.local}
+      Mindlex__Admins__0__Password: ${ADMIN_PASSWORD:-Admin123!}
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        # Build-time API URL baked into the Vite bundle.
+        VITE_API_BASE_URL: ${VITE_API_BASE_URL:-/api}
+    container_name: mindlex-frontend
+    depends_on:
+      - backend
+    ports:
+      - "3000:80"
+    restart: unless-stopped
+
+volumes:
+  mindlex_pgdata:

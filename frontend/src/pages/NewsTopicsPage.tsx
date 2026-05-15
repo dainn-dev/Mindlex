@@ -68,11 +68,11 @@ export function NewsTopicsPage() {
       <main className="p-4 md:p-7">
         <h1 className="font-display text-2xl text-navy">Your topic interests</h1>
         <p className="text-slate-500 text-sm mb-5">
-          Pick up to 10 topics \u2014 your feed adapts in real time.
+          Pick up to 10 topics — your feed adapts in real time.
         </p>
         {!canEdit && (
           <div className="bg-amber-50 border border-amber-200 text-navy p-3.5 rounded-md text-sm mb-5">
-            <strong>Premium feature</strong> \u2014 Free users see the default Cyprus law feed.
+            <strong>Premium feature</strong> — Free users see the default Cyprus law feed.
           </div>
         )}
         <div className="flex flex-wrap gap-2.5 max-w-2xl">
@@ -87,7 +87,7 @@ export function NewsTopicsPage() {
                   : "chip cursor-pointer"
               }
             >
-              {t} {selected.has(t) && "\u2713"}
+              {t} {selected.has(t) && "✓"}
             </button>
           ))}
         </div>

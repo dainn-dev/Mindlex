@@ -1,4 +1,4 @@
-// Screen 7 \u2605 \u2014 Legal Chatbot
+// Screen 7 ★ — Legal Chatbot
 import { useEffect, useRef, useState } from "react";
 import { useLocation, Link } from "react-router-dom";
 import { Link2, ShieldCheck, Download, MessagesSquare, Sparkles } from "lucide-react";
@@ -309,7 +309,7 @@ function ReferenceWidget() {
         </Link>
       ))}
       <div className="mt-5 pt-4 border-t border-slate-200 text-[11px] text-slate-400">
-        \u00a9 {year} MINDLEX LIMITED
+        © {year} MINDLEX LIMITED
       </div>
     </aside>
   );
@@ -331,7 +331,7 @@ function ComplianceResults({
       {issues.map((it, i) => (
         <div key={i} className="mt-2.5 pt-2.5 border-t border-amber-200 first:border-0 first:pt-0">
           <strong className="text-sm">
-            {it.severity ? `${it.severity.toUpperCase()} \u2014 ` : ""}
+            {it.severity ? `${it.severity.toUpperCase()} — ` : ""}
             {it.title}
           </strong>
           <p className="text-xs italic text-slate-500 mt-0.5">{it.sourceSnippet}</p>

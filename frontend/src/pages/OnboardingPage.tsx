@@ -1,4 +1,4 @@
-// UM19 \u2014 First-login onboarding with 5 feature cards + example questions
+// UM19 — First-login onboarding with 5 feature cards + example questions
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Scale, Newspaper, FolderOpen, Pencil, ShieldCheck } from "lucide-react";

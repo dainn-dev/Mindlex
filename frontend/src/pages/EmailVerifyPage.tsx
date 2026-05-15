@@ -81,7 +81,7 @@ export function EmailVerifyPage() {
         {countdown > 0 ? `Resend in 0:${String(countdown).padStart(2, "0")}` : "Resend verification email"}
       </Button>
       <p className="text-center text-sm text-slate-500 mt-4">
-        Already verified? <Link to="/login" className="text-navy font-semibold">Sign in \u2192</Link>
+        Already verified? <Link to="/login" className="text-navy font-semibold">Sign in →</Link>
       </p>
     </Wrap>
   );

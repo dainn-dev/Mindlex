@@ -1,0 +1,16 @@
+bin/
+obj/
+*.user
+*.suo
+.vs/
+.idea/
+.vscode/
+*.cache
+*.lscache
+**/appsettings.Development.json
+**/appsettings.Local.json
+**/.env*
+**/secrets*
+node_modules/
+README.md
+Properties/launchSettings.json

@@ -1,4 +1,4 @@
-// UM6 \u2014 OAuth complete profile (DOB) after social signup
+// UM6 — OAuth complete profile (DOB) after social signup
 import { FormEvent, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "@/store/authStore";

@@ -1,4 +1,4 @@
-// CM1 + CM2 + CM3 + CM4 + DA2 \u2014 My Drive
+// CM1 + CM2 + CM3 + CM4 + DA2 — My Drive
 import { useEffect, useRef, useState } from "react";
 import { api, apiError } from "@/lib/api";
 import { Button } from "@/components/ui/Button";
@@ -102,7 +102,7 @@ export function DrivePage() {
       <main className="p-4 md:p-7">
         <h1 className="font-display text-2xl text-navy">My Drive</h1>
         <p className="text-slate-500 text-sm mb-5">
-          {files.length} files \u00b7 {formatBytes(used)} of {formatBytes(QUOTA)} used
+          {files.length} files · {formatBytes(used)} of {formatBytes(QUOTA)} used
         </p>
 
         <div
@@ -115,7 +115,7 @@ export function DrivePage() {
           <button onClick={() => fileInput.current?.click()} className="text-navy font-semibold underline">
             browse
           </button>{" "}
-          \u00b7 Max 5 files, 25 MB each
+          · Max 5 files, 25 MB each
           <input
             ref={fileInput}
             type="file"
@@ -129,7 +129,7 @@ export function DrivePage() {
         <div className="flex gap-2.5 items-center mb-3.5 flex-wrap">
           <input
             className="input max-w-xs"
-            placeholder="Search files\u2026"
+            placeholder="Search files…"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />

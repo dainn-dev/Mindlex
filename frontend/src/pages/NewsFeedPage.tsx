@@ -47,12 +47,12 @@ export function NewsFeedPage() {
       <main className="p-4 md:p-7">
         <h1 className="font-display text-2xl text-navy">Legal news</h1>
         <p className="text-slate-500 text-sm mb-5">
-          Personalized for your interests \u00b7 refreshed daily at 04:00 UTC
-          {usingDefault && " \u00b7 Showing default Cyprus feed."}
+          Personalized for your interests · refreshed daily at 04:00 UTC
+          {usingDefault && " · Showing default Cyprus feed."}
         </p>
         {items.length === 0 ? (
           <EmptyState
-            icon="\ud83d\udcf0"
+            icon="📰"
             title="Nothing new on your topics today"
             description="We'll notify you the moment new articles match your interests."
             action={<Link to="/news/topics" className="btn-outline">Edit topics</Link>}
