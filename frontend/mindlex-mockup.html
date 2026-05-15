@@ -1,0 +1,3133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Mindlex — Hi-Fi Mockup</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #0f1e3d;
+    --navy-2: #1a2d52;
+    --navy-light: #2c4373;
+    --gold: #c9a96e;
+    --gold-dark: #a8884f;
+    --cream: #faf8f3;
+    --bg: #f6f7fb;
+    --surface: #ffffff;
+    --border: #e5e7eb;
+    --border-strong: #cbd5e1;
+    --text: #0f172a;
+    --text-muted: #64748b;
+    --text-light: #94a3b8;
+    --success: #10b981;
+    --danger: #ef4444;
+    --warning: #f59e0b;
+    --info: #3b82f6;
+    --radius: 10px;
+    --radius-sm: 6px;
+    --radius-lg: 16px;
+    --shadow: 0 1px 2px rgba(15, 30, 61, 0.05), 0 4px 12px rgba(15, 30, 61, 0.04);
+    --shadow-lg: 0 10px 40px rgba(15, 30, 61, 0.08);
+    --font: 'Inter', system-ui, -apple-system, sans-serif;
+    --font-display: 'Playfair Display', Georgia, serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: var(--font);
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  /* ============ APP SHELL (mockup viewer) ============ */
+  .viewer {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    min-height: 100vh;
+  }
+  .viewer-sidebar {
+    background: var(--navy);
+    color: #fff;
+    padding: 24px 0;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+  }
+  .viewer-brand {
+    padding: 0 24px 20px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    margin-bottom: 16px;
+  }
+  .viewer-brand .logo {
+    font-family: var(--font-display);
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--gold);
+  }
+  .viewer-brand .sub {
+    font-size: 11px;
+    color: rgba(255,255,255,0.6);
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    margin-top: 4px;
+  }
+  .viewer-section {
+    padding: 8px 16px;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    color: rgba(255,255,255,0.45);
+    margin-top: 12px;
+  }
+  .viewer-nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 24px;
+    color: rgba(255,255,255,0.8);
+    cursor: pointer;
+    font-size: 13.5px;
+    border-left: 3px solid transparent;
+    transition: all 0.15s;
+  }
+  .viewer-nav-item:hover { background: rgba(255,255,255,0.05); color: #fff; }
+  .viewer-nav-item.active {
+    background: rgba(201, 169, 110, 0.12);
+    color: var(--gold);
+    border-left-color: var(--gold);
+  }
+  .viewer-nav-item .num {
+    width: 22px;
+    font-size: 11px;
+    color: rgba(255,255,255,0.5);
+    font-weight: 600;
+  }
+  .viewer-nav-item.active .num { color: var(--gold); }
+  .viewer-main {
+    padding: 28px 36px;
+  }
+  .viewer-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 20px;
+    margin-bottom: 24px;
+  }
+  .viewer-header h1 {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--navy);
+  }
+  .viewer-header .meta {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-top: 4px;
+  }
+  .viewer-header .meta a { color: var(--navy-light); }
+  .viewer-toggles {
+    display: flex;
+    gap: 6px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 4px;
+  }
+  .viewer-toggles button {
+    background: none;
+    border: none;
+    padding: 6px 14px;
+    font-size: 13px;
+    color: var(--text-muted);
+    border-radius: 999px;
+    cursor: pointer;
+    font-family: inherit;
+    font-weight: 500;
+  }
+  .viewer-toggles button.active {
+    background: var(--navy);
+    color: #fff;
+  }
+  .issue-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 20px;
+  }
+  .pill {
+    font-size: 11px;
+    padding: 3px 9px;
+    border-radius: 999px;
+    background: #eef0f6;
+    color: var(--navy);
+    font-weight: 600;
+    border: 1px solid transparent;
+  }
+  .pill.UM { background: #e0e7ff; color: #4338ca; }
+  .pill.LC { background: #dbeafe; color: #1d4ed8; }
+  .pill.LU { background: #fef3c7; color: #92400e; }
+  .pill.PB { background: #d1fae5; color: #065f46; }
+  .pill.CM { background: #fce7f3; color: #9d174d; }
+  .pill.DC { background: #fee2e2; color: #991b1b; }
+  .pill.DA { background: #ede9fe; color: #5b21b6; }
+  .pill.DD { background: #ccfbf1; color: #115e59; }
+  .stage {
+    display: flex;
+    gap: 28px;
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+  .device {
+    background: var(--surface);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+    overflow: hidden;
+    border: 1px solid var(--border);
+  }
+  .device.desktop {
+    width: 100%;
+    max-width: 1180px;
+    aspect-ratio: auto;
+  }
+  .device.mobile {
+    width: 360px;
+    flex-shrink: 0;
+  }
+  .device-bar {
+    height: 28px;
+    background: #eef0f4;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0 12px;
+    border-bottom: 1px solid var(--border);
+  }
+  .device-bar i {
+    width: 10px; height: 10px; border-radius: 50%;
+    background: #e2e6ec; display: block;
+  }
+  .device-bar i:nth-child(1){ background:#ff5f57; }
+  .device-bar i:nth-child(2){ background:#ffbd2e; }
+  .device-bar i:nth-child(3){ background:#28c840; }
+  .device-bar .url {
+    margin-left: 16px;
+    font-size: 11px;
+    color: var(--text-muted);
+    background: #fff;
+    padding: 3px 10px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+  }
+  .screen { display: none; }
+  .screen.active { display: block; }
+  .device.mobile { display: none; }
+  body.show-mobile .device.desktop { display: none; }
+  body.show-mobile .device.mobile { display: block; }
+  body.show-both .device.mobile { display: block; }
+
+  /* ============ SHARED UI INSIDE MOCKUPS ============ */
+  .m-app {
+    background: var(--bg);
+    min-height: 720px;
+    font-size: 14px;
+  }
+  .m-app.tall { min-height: 880px; }
+  .m-topbar {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    padding: 0 24px;
+    height: 60px;
+    gap: 24px;
+  }
+  .m-logo {
+    font-family: var(--font-display);
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--navy);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .m-logo .dot {
+    width: 28px; height: 28px;
+    background: linear-gradient(135deg, var(--navy), var(--navy-light));
+    border-radius: 8px;
+    color: var(--gold);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; font-weight: 800;
+    font-family: var(--font);
+  }
+  .m-nav {
+    display: flex;
+    gap: 4px;
+    margin-left: 16px;
+    flex: 1;
+  }
+  .m-nav a {
+    padding: 8px 14px;
+    border-radius: var(--radius-sm);
+    color: var(--text-muted);
+    text-decoration: none;
+    font-size: 13.5px;
+    font-weight: 500;
+    position: relative;
+  }
+  .m-nav a.active { background: #eef0f6; color: var(--navy); }
+  .m-nav a:hover:not(.active) { background: #f5f6fa; color: var(--text); }
+  .m-nav a .reddot {
+    position: absolute;
+    top: 4px; right: 6px;
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--danger);
+  }
+  .m-topbar-right {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .m-avatar {
+    width: 34px; height: 34px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #c9a96e, #d8b677);
+    color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700;
+    font-size: 13px;
+    cursor: pointer;
+  }
+  .m-quota {
+    font-size: 12px;
+    background: #eef0f6;
+    padding: 5px 11px;
+    border-radius: 999px;
+    color: var(--navy);
+    font-weight: 600;
+  }
+  .m-btn {
+    padding: 9px 18px;
+    border-radius: var(--radius-sm);
+    border: none;
+    font-family: inherit;
+    font-weight: 600;
+    font-size: 13.5px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .m-btn.primary { background: var(--navy); color: #fff; }
+  .m-btn.primary:hover { background: var(--navy-2); }
+  .m-btn.gold { background: var(--gold); color: var(--navy); }
+  .m-btn.outline { background: #fff; color: var(--navy); border: 1px solid var(--border-strong); }
+  .m-btn.ghost { background: transparent; color: var(--navy); }
+  .m-btn.danger { background: var(--danger); color: #fff; }
+  .m-btn.sm { padding: 6px 12px; font-size: 12.5px; }
+  .m-btn.full { width: 100%; justify-content: center; }
+  .m-btn.disabled, .m-btn[disabled] { opacity: 0.5; cursor: not-allowed; }
+
+  .m-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+  }
+  .m-card.flat { box-shadow: none; }
+
+  .m-input {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-sm);
+    font-family: inherit;
+    font-size: 14px;
+    background: #fff;
+  }
+  .m-input:focus { outline: 2px solid var(--gold); outline-offset: -1px; }
+  .m-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-muted);
+    display: block;
+    margin-bottom: 6px;
+  }
+  .m-field { margin-bottom: 14px; }
+  .m-error {
+    color: var(--danger);
+    font-size: 12px;
+    margin-top: 5px;
+  }
+
+  /* CHIP */
+  .chip {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 4px 11px;
+    background: #eef0f6;
+    color: var(--navy);
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 500;
+  }
+  .chip.active { background: var(--navy); color: #fff; }
+  .chip.gold { background: var(--gold); color: var(--navy); }
+  .chip.success { background: #d1fae5; color: #065f46; }
+  .chip.danger { background: #fee2e2; color: #991b1b; }
+  .chip.warn { background: #fef3c7; color: #92400e; }
+
+  /* TABLES */
+  .m-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13.5px;
+  }
+  .m-table th {
+    text-align: left;
+    padding: 11px 12px;
+    color: var(--text-muted);
+    font-weight: 600;
+    border-bottom: 1px solid var(--border);
+    background: #fafbfd;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+  }
+  .m-table td {
+    padding: 12px;
+    border-bottom: 1px solid var(--border);
+  }
+  .m-table tr:last-child td { border-bottom: none; }
+  .m-table tr:hover td { background: #fafbfd; }
+
+  /* ============ SCREEN 1: HOMEPAGE ============ */
+  .home {
+    background: linear-gradient(180deg, #fff, var(--cream));
+  }
+  .home-hero {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 50px;
+    padding: 50px 60px 40px;
+    align-items: center;
+  }
+  .home-left h1 {
+    font-family: var(--font-display);
+    font-size: 38px;
+    color: var(--navy);
+    line-height: 1.15;
+    margin-bottom: 12px;
+  }
+  .home-left .tagline {
+    color: var(--text-muted);
+    margin-bottom: 24px;
+    font-size: 16px;
+  }
+  .home-carousel {
+    background: linear-gradient(135deg, var(--navy), var(--navy-light));
+    border-radius: 14px;
+    height: 320px;
+    padding: 30px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    color: #fff;
+    box-shadow: var(--shadow-lg);
+    position: relative;
+    overflow: hidden;
+  }
+  .home-carousel::before {
+    content: ''; position: absolute; right: -60px; top: -60px;
+    width: 240px; height: 240px;
+    background: radial-gradient(circle, var(--gold) 0%, transparent 70%);
+    opacity: 0.25;
+  }
+  .home-carousel h3 {
+    font-family: var(--font-display);
+    font-size: 26px;
+    color: var(--gold);
+    margin-bottom: 10px;
+  }
+  .home-carousel p { font-size: 14px; opacity: 0.85; max-width: 320px; }
+  .carousel-dots {
+    display: flex; gap: 6px; align-self: flex-start;
+    z-index: 2;
+  }
+  .carousel-dots span {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: rgba(255,255,255,0.4);
+  }
+  .carousel-dots span.active { background: var(--gold); width: 22px; border-radius: 4px; }
+  .home-plans {
+    padding: 30px 60px;
+  }
+  .home-plans h2 {
+    font-family: var(--font-display);
+    font-size: 26px;
+    color: var(--navy);
+    text-align: center;
+    margin-bottom: 24px;
+  }
+  .plan-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
+  }
+  .plan-card {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 22px;
+  }
+  .plan-card.featured {
+    border-color: var(--gold);
+    background: linear-gradient(180deg, #fff, #fffbf2);
+    box-shadow: 0 4px 24px rgba(201, 169, 110, 0.18);
+    position: relative;
+  }
+  .plan-card.featured::before {
+    content: 'POPULAR';
+    position: absolute;
+    top: -10px; right: 20px;
+    background: var(--gold);
+    color: var(--navy);
+    font-size: 10px;
+    font-weight: 800;
+    padding: 4px 10px;
+    border-radius: 4px;
+    letter-spacing: 1px;
+  }
+  .plan-card h3 {
+    color: var(--navy);
+    font-size: 18px;
+    margin-bottom: 4px;
+  }
+  .plan-card .price {
+    font-family: var(--font-display);
+    font-size: 36px;
+    color: var(--navy);
+    margin: 8px 0 4px;
+  }
+  .plan-card .price small {
+    font-size: 13px;
+    color: var(--text-muted);
+    font-family: var(--font);
+    font-weight: 500;
+  }
+  .plan-card ul {
+    list-style: none;
+    margin-top: 14px;
+    font-size: 13px;
+    color: var(--text);
+  }
+  .plan-card ul li {
+    padding: 5px 0 5px 22px;
+    position: relative;
+  }
+  .plan-card ul li::before {
+    content: '✓';
+    position: absolute; left: 0; color: var(--gold);
+    font-weight: 700;
+  }
+  .home-faq {
+    padding: 40px 60px;
+    max-width: 760px;
+    margin: 0 auto;
+  }
+  .home-faq h2 {
+    font-family: var(--font-display);
+    color: var(--navy);
+    margin-bottom: 18px;
+    font-size: 24px;
+  }
+  .faq-item {
+    border-bottom: 1px solid var(--border);
+    padding: 14px 0;
+    cursor: pointer;
+  }
+  .faq-q {
+    display: flex;
+    justify-content: space-between;
+    font-weight: 600;
+    color: var(--navy);
+  }
+  .faq-q::after {
+    content: '+'; color: var(--gold); font-size: 22px; line-height: 1;
+  }
+  .faq-item.open .faq-q::after { content: '−'; }
+  .faq-a {
+    font-size: 13.5px;
+    color: var(--text-muted);
+    margin-top: 8px;
+    display: none;
+  }
+  .faq-item.open .faq-a { display: block; }
+  .home-footer {
+    background: var(--navy);
+    color: rgba(255,255,255,0.7);
+    padding: 24px 60px;
+    font-size: 13px;
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .home-footer a { color: var(--gold); text-decoration: none; margin-right: 16px; }
+
+  /* ============ AUTH PAGES (centered card) ============ */
+  .auth-shell {
+    min-height: 720px;
+    background: linear-gradient(135deg, var(--navy), var(--navy-light));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    position: relative;
+    overflow: hidden;
+  }
+  .auth-shell::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 20% 30%, rgba(201,169,110,0.18), transparent 50%),
+                radial-gradient(circle at 80% 70%, rgba(201,169,110,0.12), transparent 50%);
+  }
+  .auth-card {
+    background: #fff;
+    border-radius: var(--radius-lg);
+    padding: 36px;
+    width: 100%;
+    max-width: 460px;
+    box-shadow: var(--shadow-lg);
+    position: relative;
+  }
+  .auth-card .logo-row {
+    text-align: center;
+    margin-bottom: 22px;
+  }
+  .auth-card .logo-row .m-logo {
+    justify-content: center;
+  }
+  .auth-card h2 {
+    font-family: var(--font-display);
+    color: var(--navy);
+    font-size: 26px;
+    text-align: center;
+    margin-bottom: 4px;
+  }
+  .auth-card .subtitle {
+    color: var(--text-muted);
+    text-align: center;
+    font-size: 13.5px;
+    margin-bottom: 24px;
+  }
+  .auth-divider {
+    text-align: center;
+    color: var(--text-light);
+    font-size: 12px;
+    position: relative;
+    margin: 18px 0;
+  }
+  .auth-divider::before, .auth-divider::after {
+    content: ''; position: absolute; top: 50%;
+    width: 40%; height: 1px; background: var(--border);
+  }
+  .auth-divider::before { left: 0; }
+  .auth-divider::after { right: 0; }
+  .social-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .social-btn {
+    border: 1px solid var(--border);
+    background: #fff;
+    padding: 9px;
+    border-radius: var(--radius-sm);
+    font-weight: 500;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    font-size: 13px;
+    font-family: inherit;
+  }
+  .social-btn:hover { background: #fafbfd; }
+  .check-row {
+    display: flex; align-items: flex-start; gap: 9px;
+    font-size: 13px; color: var(--text);
+    margin-bottom: 14px;
+  }
+  .check-row input { margin-top: 3px; }
+  .check-row a { color: var(--navy); text-decoration: underline; }
+  .form-foot {
+    text-align: center;
+    margin-top: 18px;
+    font-size: 13.5px;
+    color: var(--text-muted);
+  }
+  .form-foot a { color: var(--navy); font-weight: 600; }
+  .error-banner {
+    background: #fee2e2;
+    border: 1px solid #fca5a5;
+    color: #991b1b;
+    padding: 10px 14px;
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    margin-bottom: 16px;
+  }
+
+  /* ============ DASHBOARD (sidebar + main) ============ */
+  .dashboard {
+    display: grid;
+    grid-template-columns: 230px 1fr;
+    min-height: 720px;
+    background: var(--bg);
+  }
+  .side {
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    padding: 22px 14px;
+  }
+  .side-section {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-light);
+    padding: 6px 10px;
+    margin-top: 14px;
+  }
+  .side a {
+    display: flex; align-items: center; gap: 10px;
+    padding: 9px 11px;
+    color: var(--text);
+    text-decoration: none;
+    border-radius: var(--radius-sm);
+    font-size: 13.5px;
+    margin-bottom: 2px;
+  }
+  .side a:hover { background: #f4f5f7; }
+  .side a.active {
+    background: var(--navy); color: #fff;
+  }
+  .side a .ic {
+    width: 18px; height: 18px;
+    display: inline-flex; align-items: center; justify-content: center;
+    opacity: 0.7;
+  }
+  .side a.active .ic { opacity: 1; }
+  .main {
+    padding: 26px 32px;
+  }
+  .main h1 {
+    font-family: var(--font-display);
+    font-size: 26px;
+    color: var(--navy);
+    margin-bottom: 4px;
+  }
+  .main .crumb {
+    color: var(--text-muted);
+    font-size: 13px;
+    margin-bottom: 20px;
+  }
+
+  /* ============ CHAT SCREEN ============ */
+  .chat-shell {
+    display: grid;
+    grid-template-columns: 240px 1fr 280px;
+    min-height: 720px;
+    background: var(--bg);
+  }
+  .chat-history {
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    padding: 18px 12px;
+    overflow-y: auto;
+  }
+  .chat-history h4 {
+    font-size: 11px; text-transform: uppercase; letter-spacing: 1px;
+    color: var(--text-light); padding: 4px 8px; margin-bottom: 10px;
+  }
+  .chat-history .thread {
+    padding: 10px 12px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    margin-bottom: 4px;
+  }
+  .chat-history .thread:hover { background: #f4f5f7; }
+  .chat-history .thread.active { background: #eef0f6; }
+  .chat-history .thread .t1 { font-size: 13px; font-weight: 500; color: var(--text); }
+  .chat-history .thread .t2 { font-size: 11px; color: var(--text-light); margin-top: 2px; }
+  .chat-history .new-btn {
+    margin-bottom: 10px;
+  }
+  .chat-main {
+    display: flex; flex-direction: column;
+    height: 720px;
+    position: relative;
+  }
+  .chat-header {
+    padding: 14px 24px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .chat-header h3 { font-size: 16px; color: var(--navy); }
+  .chat-header .badges { display: flex; gap: 8px; }
+  .chat-stream {
+    flex: 1;
+    overflow-y: auto;
+    padding: 22px 24px;
+  }
+  .msg { margin-bottom: 22px; max-width: 720px; }
+  .msg.user { margin-left: auto; }
+  .msg-bubble {
+    padding: 14px 16px;
+    border-radius: 12px;
+    font-size: 14px;
+    line-height: 1.55;
+  }
+  .msg.user .msg-bubble {
+    background: var(--navy);
+    color: #fff;
+    border-bottom-right-radius: 4px;
+  }
+  .msg.assistant .msg-bubble {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-bottom-left-radius: 4px;
+  }
+  .msg.assistant.toxic .msg-bubble {
+    background: #fef2f2;
+    border-color: var(--danger);
+    color: #991b1b;
+  }
+  .msg-meta {
+    display: flex; gap: 14px; margin-top: 8px;
+    font-size: 12px; color: var(--text-light);
+    align-items: center;
+  }
+  .msg-meta .ic {
+    cursor: pointer; padding: 2px 4px;
+    color: var(--text-muted);
+  }
+  .msg-meta .ic:hover { color: var(--navy); }
+  .msg-meta .ic.active { color: var(--gold); font-weight: 700; }
+  .sources {
+    margin-top: 12px;
+    border-top: 1px dashed var(--border);
+    padding-top: 10px;
+    font-size: 12.5px;
+  }
+  .sources strong { color: var(--navy); }
+  .sources a { color: var(--info); display: block; padding: 3px 0; }
+  .disclaimer {
+    font-size: 11.5px; color: var(--text-light); margin-top: 8px; font-style: italic;
+  }
+  .compliance-block {
+    background: #fffbf2;
+    border-left: 3px solid var(--gold);
+    padding: 14px 16px;
+    border-radius: var(--radius-sm);
+    margin-top: 12px;
+    font-size: 13px;
+  }
+  .compliance-block h5 {
+    color: var(--navy);
+    margin-bottom: 6px;
+    font-size: 13px;
+  }
+  .compliance-block .issue {
+    margin-top: 10px; padding-top: 10px; border-top: 1px solid #f1e8d0;
+  }
+  .chat-composer {
+    border-top: 1px solid var(--border);
+    background: var(--surface);
+    padding: 14px 24px;
+  }
+  .composer-toolbar {
+    display: flex; gap: 8px; align-items: center; margin-bottom: 10px;
+    font-size: 12.5px; color: var(--text-muted);
+  }
+  .composer-toolbar .tone-toggle {
+    display: flex; background: #eef0f6; border-radius: 999px; padding: 3px; margin-left: auto;
+  }
+  .composer-toolbar .tone-toggle button {
+    background: none; border: none; padding: 4px 10px;
+    font-size: 11.5px; cursor: pointer; border-radius: 999px;
+    font-family: inherit; font-weight: 500;
+  }
+  .composer-toolbar .tone-toggle button.active {
+    background: #fff; color: var(--navy); box-shadow: 0 1px 2px rgba(0,0,0,0.06);
+  }
+  .composer-input {
+    display: flex; align-items: flex-end; gap: 10px;
+    background: #f4f5f7;
+    border-radius: var(--radius);
+    padding: 8px 8px 8px 14px;
+    border: 1px solid transparent;
+  }
+  .composer-input:focus-within { border-color: var(--gold); background: #fff; }
+  .composer-input textarea {
+    flex: 1;
+    border: none;
+    resize: none;
+    background: transparent;
+    font-family: inherit;
+    font-size: 14px;
+    height: 40px;
+    padding: 8px 0;
+    outline: none;
+  }
+  .send-btn {
+    width: 38px; height: 38px;
+    border-radius: 50%;
+    background: var(--navy); color: #fff;
+    border: none; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+  }
+  .chat-ref-widget {
+    background: var(--surface);
+    border-left: 1px solid var(--border);
+    padding: 18px 16px;
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+  .chat-ref-widget h5 {
+    color: var(--navy); font-size: 12px;
+    text-transform: uppercase; letter-spacing: 1px;
+    margin-bottom: 10px;
+  }
+  .chat-ref-widget a {
+    color: var(--navy); text-decoration: none; display: block; padding: 5px 0;
+  }
+  .chat-ref-widget a:hover { color: var(--gold); }
+
+  .toast {
+    position: absolute;
+    top: 16px; right: 16px;
+    background: var(--navy);
+    color: #fff;
+    padding: 10px 16px;
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    display: flex; align-items: center; gap: 10px;
+    box-shadow: var(--shadow-lg);
+    z-index: 10;
+  }
+  .toast.success { background: var(--success); }
+  .toast.warn { background: var(--warning); color: #fff; }
+
+  /* ============ NEWS ============ */
+  .news-grid {
+    display: grid; gap: 14px;
+  }
+  .news-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px 20px;
+    display: grid;
+    grid-template-columns: 80px 1fr auto;
+    gap: 16px;
+    align-items: center;
+    cursor: pointer;
+  }
+  .news-card.unread { border-left: 3px solid var(--gold); background: #fffdf7; }
+  .news-card .news-date {
+    text-align: center;
+    background: #f4f5f7;
+    border-radius: var(--radius-sm);
+    padding: 10px;
+  }
+  .news-card .news-date .d { font-size: 22px; font-weight: 700; color: var(--navy); }
+  .news-card .news-date .m { font-size: 11px; color: var(--text-muted); text-transform: uppercase; }
+  .news-card h4 { color: var(--navy); margin-bottom: 4px; font-size: 15px; }
+  .news-card .summary { font-size: 13px; color: var(--text-muted); }
+  .news-card .tags { margin-top: 8px; display: flex; gap: 6px; flex-wrap: wrap; }
+
+  /* ============ DRIVE ============ */
+  .drive-toolbar {
+    display: flex; gap: 10px; align-items: center; margin-bottom: 16px; flex-wrap: wrap;
+  }
+  .quota-bar {
+    flex: 1; max-width: 240px;
+    background: #f4f5f7; border-radius: 999px; height: 8px;
+    position: relative; overflow: hidden;
+  }
+  .quota-bar .fill {
+    background: linear-gradient(90deg, var(--gold), var(--gold-dark));
+    height: 100%; border-radius: 999px;
+  }
+  .dropzone {
+    border: 2px dashed var(--border-strong);
+    border-radius: var(--radius);
+    padding: 36px;
+    text-align: center;
+    color: var(--text-muted);
+    background: #fafbfd;
+    margin-bottom: 18px;
+  }
+  .dropzone .ic { font-size: 32px; color: var(--gold); }
+
+  /* ============ BILLING ============ */
+  .bill-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 18px;
+  }
+  .invoice-icon {
+    width: 30px; height: 30px;
+    border-radius: 6px;
+    background: #eef0f6;
+    color: var(--navy);
+    display: inline-flex; align-items: center; justify-content: center;
+    cursor: pointer;
+  }
+  .invoice-icon:hover { background: var(--navy); color: var(--gold); }
+
+  /* ============ ONBOARDING ============ */
+  .onboard-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 14px;
+    margin: 24px 0;
+  }
+  .onboard-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .onboard-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+    border-color: var(--gold);
+  }
+  .onboard-card .emoji {
+    font-size: 30px; margin-bottom: 8px; display: block;
+  }
+  .onboard-card h5 { color: var(--navy); margin-bottom: 4px; }
+  .onboard-card p { font-size: 12px; color: var(--text-muted); }
+
+  .ex-questions {
+    background: #fffbf2;
+    border-radius: var(--radius);
+    padding: 18px 22px;
+    margin-top: 14px;
+  }
+  .ex-questions h5 { color: var(--navy); margin-bottom: 8px; }
+  .ex-questions div {
+    background: #fff; padding: 9px 14px; border-radius: var(--radius-sm);
+    margin: 6px 0; font-size: 13px; cursor: pointer;
+    border: 1px solid var(--border);
+  }
+  .ex-questions div:hover { border-color: var(--gold); }
+
+  /* ============ ADMIN ============ */
+  .stat-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 20px;
+  }
+  .stat-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 16px;
+  }
+  .stat-card .label { font-size: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+  .stat-card .value { font-family: var(--font-display); font-size: 26px; color: var(--navy); margin-top: 4px; }
+  .stat-card .trend { font-size: 12px; color: var(--success); margin-top: 4px; }
+
+  /* MODAL / POPUP visual */
+  .modal-demo {
+    position: absolute;
+    inset: 0;
+    background: rgba(15, 30, 61, 0.5);
+    display: flex; align-items: center; justify-content: center;
+    pointer-events: none;
+  }
+  .modal-box {
+    background: #fff;
+    border-radius: var(--radius-lg);
+    padding: 24px 26px;
+    max-width: 400px;
+    box-shadow: var(--shadow-lg);
+  }
+  .modal-box h4 { color: var(--navy); margin-bottom: 8px; }
+  .modal-box p { font-size: 13.5px; color: var(--text-muted); margin-bottom: 18px; }
+  .modal-box .actions { display: flex; gap: 10px; justify-content: flex-end; }
+
+  /* MOBILE-specific overrides inside mockup */
+  .device.mobile .m-app { min-height: 640px; }
+  .device.mobile .m-topbar { padding: 0 14px; height: 54px; gap: 10px; }
+  .device.mobile .m-nav { display: none; }
+  .device.mobile .home-hero { grid-template-columns: 1fr; padding: 24px 18px; gap: 22px; }
+  .device.mobile .home-left h1 { font-size: 26px; }
+  .device.mobile .home-carousel { height: 200px; padding: 20px; }
+  .device.mobile .home-carousel h3 { font-size: 18px; }
+  .device.mobile .home-plans, .device.mobile .home-faq, .device.mobile .home-footer { padding: 24px 18px; }
+  .device.mobile .plan-grid { grid-template-columns: 1fr; }
+  .device.mobile .auth-card { padding: 24px; }
+  .device.mobile .dashboard { grid-template-columns: 1fr; }
+  .device.mobile .side { display: none; }
+  .device.mobile .main { padding: 18px; }
+  .device.mobile .chat-shell { grid-template-columns: 1fr; }
+  .device.mobile .chat-history, .device.mobile .chat-ref-widget { display: none; }
+  .device.mobile .chat-stream { padding: 16px; }
+  .device.mobile .chat-composer { padding: 12px 14px; }
+  .device.mobile .news-card { grid-template-columns: 60px 1fr; }
+  .device.mobile .news-card .summary { display: none; }
+  .device.mobile .bill-grid { grid-template-columns: 1fr; }
+  .device.mobile .onboard-grid { grid-template-columns: 1fr 1fr; }
+  .device.mobile .stat-grid { grid-template-columns: 1fr 1fr; }
+  .device.mobile .m-table th:nth-child(n+4), .device.mobile .m-table td:nth-child(n+4) { display: none; }
+
+  /* Mobile burger */
+  .mobile-burger { display: none; }
+  .device.mobile .mobile-burger {
+    display: flex; align-items: center; justify-content: center;
+    width: 36px; height: 36px; border-radius: 8px;
+    background: #f4f5f7; color: var(--navy);
+  }
+
+  @media (max-width: 1100px) {
+    .viewer { grid-template-columns: 240px 1fr; }
+  }
+  @media (max-width: 880px) {
+    .viewer { grid-template-columns: 1fr; }
+    .viewer-sidebar { position: relative; height: auto; }
+  }
+
+  /* ============ STATES GALLERY ============ */
+  .gallery {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+  }
+  .state-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+  }
+  .state-card-head {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    background: #fafbfd;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+  .state-card-head h3 {
+    font-size: 13.5px;
+    color: var(--navy);
+    font-weight: 600;
+  }
+  .state-card-head .src {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-weight: 500;
+  }
+  .state-card-body {
+    padding: 22px;
+    min-height: 230px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .state-card-body.dark {
+    background: linear-gradient(135deg, var(--navy), var(--navy-light));
+    color: #fff;
+  }
+  .state-card-body.danger { background: #fff5f5; }
+  .state-card-body.warn { background: #fffbea; }
+  .state-card-body.info { background: #f0f7ff; }
+  .state-card-body.muted { background: #fafbfd; }
+
+  /* error message visual */
+  .err-illu {
+    width: 60px; height: 60px;
+    border-radius: 50%;
+    background: var(--danger);
+    color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 30px; font-weight: 700;
+    margin: 0 auto 14px;
+  }
+  .err-illu.warn { background: var(--warning); }
+  .err-illu.info { background: var(--info); }
+  .err-illu.gold { background: var(--gold); color: var(--navy); }
+  .err-illu.muted { background: #cbd5e1; color: var(--text-muted); }
+  .state-card-body h4 {
+    color: var(--navy);
+    font-size: 17px;
+    text-align: center;
+    margin-bottom: 6px;
+  }
+  .state-card-body.dark h4 { color: var(--gold); }
+  .state-card-body p {
+    color: var(--text-muted);
+    font-size: 13.5px;
+    text-align: center;
+    line-height: 1.5;
+    max-width: 360px;
+    margin: 0 auto;
+  }
+  .state-card-body.dark p { color: rgba(255,255,255,0.85); }
+  .state-card-body .actions {
+    margin-top: 16px;
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .inline-err {
+    padding: 12px 16px;
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    display: flex; align-items: flex-start; gap: 10px;
+    margin: 6px 0;
+  }
+  .inline-err.danger { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
+  .inline-err.warn { background: #fef3c7; color: #92400e; border: 1px solid #fcd34d; }
+  .inline-err.info { background: #dbeafe; color: #1e3a8a; border: 1px solid #93c5fd; }
+  .inline-err .ic-emoji { font-size: 18px; line-height: 1; }
+
+  /* ============ FLOW DIAGRAM ============ */
+  .flow-wrap {
+    background: var(--surface);
+    border-radius: var(--radius-lg);
+    padding: 28px;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border);
+    overflow-x: auto;
+  }
+  .flow-wrap h3 {
+    color: var(--navy);
+    font-family: var(--font-display);
+    margin-bottom: 6px;
+  }
+  .flow-wrap .legend {
+    display: flex; gap: 14px; flex-wrap: wrap;
+    margin: 16px 0 18px;
+    font-size: 12.5px;
+    color: var(--text-muted);
+  }
+  .flow-wrap .legend span {
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+  .flow-wrap .legend i {
+    width: 14px; height: 14px; border-radius: 4px; display: inline-block;
+  }
+  .flow-wrap svg { width: 100%; height: auto; min-width: 900px; display: block; }
+
+  /* Gallery responsive */
+  .device.mobile .gallery { grid-template-columns: 1fr; }
+</style>
+</head>
+<body>
+<div class="viewer">
+  <aside class="viewer-sidebar">
+    <div class="viewer-brand">
+      <div class="logo">Mindlex</div>
+      <div class="sub">Hi-Fi Mockup · 16 screens</div>
+    </div>
+
+    <div class="viewer-section">Public</div>
+    <div class="viewer-nav-item active" data-screen="s1"><span class="num">01</span> Homepage</div>
+    <div class="viewer-nav-item" data-screen="s2"><span class="num">02</span> Registration</div>
+    <div class="viewer-nav-item" data-screen="s3"><span class="num">03</span> Email Verification</div>
+    <div class="viewer-nav-item" data-screen="s4"><span class="num">04</span> Login</div>
+    <div class="viewer-nav-item" data-screen="s5"><span class="num">05</span> Reset Password</div>
+
+    <div class="viewer-section">Main App</div>
+    <div class="viewer-nav-item" data-screen="s6"><span class="num">06</span> Onboarding</div>
+    <div class="viewer-nav-item" data-screen="s7"><span class="num">07</span> Chatbot ★</div>
+    <div class="viewer-nav-item" data-screen="s8"><span class="num">08</span> News Feed</div>
+    <div class="viewer-nav-item" data-screen="s9"><span class="num">09</span> News Topics</div>
+    <div class="viewer-nav-item" data-screen="s10"><span class="num">10</span> My Drive</div>
+
+    <div class="viewer-section">Account & Billing</div>
+    <div class="viewer-nav-item" data-screen="s11"><span class="num">11</span> My Account</div>
+    <div class="viewer-nav-item" data-screen="s12"><span class="num">12</span> Subscription Plans</div>
+    <div class="viewer-nav-item" data-screen="s13"><span class="num">13</span> Checkout</div>
+    <div class="viewer-nav-item" data-screen="s14"><span class="num">14</span> My Billing</div>
+
+    <div class="viewer-section">Admin</div>
+    <div class="viewer-nav-item" data-screen="s15"><span class="num">15</span> Admin Users</div>
+    <div class="viewer-nav-item" data-screen="s16"><span class="num">16</span> Admin Subscriptions</div>
+
+    <div class="viewer-section">States &amp; Flow</div>
+    <div class="viewer-nav-item" data-screen="s17"><span class="num">17</span> Error states</div>
+    <div class="viewer-nav-item" data-screen="s18"><span class="num">18</span> Empty states</div>
+    <div class="viewer-nav-item" data-screen="s19"><span class="num">19</span> Navigation flow</div>
+  </aside>
+
+  <main class="viewer-main">
+    <div class="viewer-header">
+      <div>
+        <h1 id="screen-title">Screen 1 — Public Homepage</h1>
+        <div class="meta" id="screen-meta">
+          Public landing page · <a href="https://linear.app/psa-app/project/mindlex-6eeabbbacaa3/issues" target="_blank">view Linear issues ↗</a>
+        </div>
+      </div>
+      <div class="viewer-toggles">
+        <button class="active" data-mode="desktop">Desktop</button>
+        <button data-mode="mobile">Mobile</button>
+        <button data-mode="both">Both</button>
+      </div>
+    </div>
+
+    <div class="issue-pills" id="issue-pills"></div>
+
+    <!-- ============ SCREEN 1 — HOMEPAGE ============ -->
+    <div class="screen active" id="s1" data-title="Screen 1 — Public Homepage" data-meta="UM14, UM18 · Public landing with embedded login, plans, FAQ & footer" data-issues="UM14|UM18">
+      <div class="stage">
+        <div class="device desktop">
+          <div class="device-bar"><i></i><i></i><i></i><span class="url">mindlex.ai/</span></div>
+          <div class="m-app home">
+            <div class="m-topbar">
+              <div class="m-logo"><span class="dot">M</span> Mindlex</div>
+              <div class="m-nav"></div>
+              <div class="m-topbar-right">
+                <button class="m-btn outline sm">Sign in</button>
+                <button class="m-btn gold sm">Sign up</button>
+              </div>
+            </div>
+
+            <div class="home-hero">
+              <div class="home-left">
+                <h1>Your AI legal counsel.<br/>On call, in plain English.</h1>
+                <p class="tagline">Mindlex helps individuals and teams understand contracts, regulations and risks — instantly.</p>
+                <div class="m-card" style="max-width: 420px; padding: 22px;">
+                  <div class="m-field">
+                    <label class="m-label">Email</label>
+                    <input class="m-input" value="you@example.com" />
+                  </div>
+                  <div class="m-field">
+                    <label class="m-label">Password</label>
+                    <input class="m-input" type="password" value="••••••••" />
+                  </div>
+                  <div style="display:flex; justify-content:space-between; align-items:center; margin: 4px 0 14px;">
+                    <label style="font-size:13px; color:var(--text-muted);"><input type="checkbox"/> Remember me</label>
+                    <a href="#" style="font-size:13px; color:var(--navy);">Forgot password?</a>
+                  </div>
+                  <button class="m-btn primary full">Sign in</button>
+                  <div class="auth-divider">or continue with</div>
+                  <div class="social-row">
+                    <button class="social-btn">🟦 Google</button>
+                    <button class="social-btn">🟧 Microsoft</button>
+                  </div>
+                </div>
+              </div>
+              <div class="home-carousel">
+                <div class="carousel-dots"><span class="active"></span><span></span><span></span><span></span></div>
+                <div>
+                  <h3>Ask anything legal.</h3>
+                  <p>From NDAs to GDPR — get answers grounded in jurisdiction-specific sources, in seconds.</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="home-plans">
+              <h2>Explore Plans</h2>
+              <div class="plan-grid">
+                <div class="plan-card">
+                  <h3>Free</h3>
+                  <div class="price">€0<small>/mo</small></div>
+                  <p style="color: var(--text-muted); font-size: 13px;">For curious individuals</p>
+                  <ul>
+                    <li>5 chat questions / day</li>
+                    <li>Plain-English answers</li>
+                    <li>Public sources</li>
+                  </ul>
+                </div>
+                <div class="plan-card featured">
+                  <h3>Plus</h3>
+                  <div class="price">€19<small>/mo</small></div>
+                  <p style="color: var(--text-muted); font-size: 13px;">For professionals</p>
+                  <ul>
+                    <li>Unlimited chat</li>
+                    <li>Technical tone toggle</li>
+                    <li>Source citations + history</li>
+                  </ul>
+                </div>
+                <div class="plan-card">
+                  <h3>Premium</h3>
+                  <div class="price">€49<small>/mo</small></div>
+                  <p style="color: var(--text-muted); font-size: 13px;">For teams</p>
+                  <ul>
+                    <li>Everything in Plus</li>
+                    <li>Document compliance check</li>
+                    <li>Drive + drafting + sharing</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            <div class="home-faq">
+              <h2>Frequently asked</h2>
+              <div class="faq-item open"><div class="faq-q">What is Mindlex?</div><div class="faq-a">A legal AI assistant that combines source-cited answers with built-in compliance tools.</div></div>
+              <div class="faq-item"><div class="faq-q">Is my data private?</div></div>
+              <div class="faq-item"><div class="faq-q">Can Mindlex draft documents?</div></div>
+              <div class="faq-item"><div class="faq-q">What jurisdictions are supported?</div></div>
+              <div class="faq-item"><div class="faq-q">How is billing handled?</div></div>
+              <div class="faq-item"><div class="faq-q">Can I cancel anytime?</div></div>
+              <div class="faq-item"><div class="faq-q">Do you offer refunds?</div></div>
+              <div class="faq-item"><div class="faq-q">How do I contact support?</div></div>
+            </div>
+
+            <div class="home-footer">
+              <div>© 2025 MINDLEX LIMITED</div>
+              <div>
+                <a href="#">Terms of Service</a>
+                <a href="#">Privacy Policy</a>
+                <a href="#">Usage Policy</a>
+                <a href="#">LinkedIn</a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="device mobile">
+          <div class="device-bar"><i></i><i></i><i></i><span class="url">mindlex.ai</span></div>
+          <div class="m-app home">
+            <div class="m-topbar">
+              <div class="m-logo"><span class="dot">M</span> Mindlex</div>
+              <div class="m-nav"></div>
+              <div class="mobile-burger">≡</div>
+            </div>
+            <div class="home-hero">
+              <div>
+                <h1>AI legal counsel.</h1>
+                <p class="tagline">Understand contracts and rules — instantly.</p>
+                <button class="m-btn primary full" style="margin-bottom:8px;">Sign in</button>
+                <button class="m-btn outline full">Create account</button>
+              </div>
+              <div class="home-carousel">
+                <div class="carousel-dots"><span class="active"></span><span></span><span></span><span></span></div>
+                <div><h3>Ask anything legal.</h3><p>Source-cited answers in plain English.</p></div>
+              </div>
+            </div>
+            <div class="home-plans">
+              <h2>Plans</h2>
+              <div class="plan-grid">
+                <div class="plan-card featured"><h3>Plus</h3><div class="price">€19<small>/mo</small></div><ul><li>Unlimited chat</li><li>Tone toggle</li></ul></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ SCREEN 2 — REGISTRATION ============ -->
+    <div class="screen" id="s2" data-title="Screen 2 — Registration" data-meta="UM1, UM2, UM15 · Sign-up form with validation + social login" data-issues="UM1|UM2|UM15">
+      <div class="stage">
+        <div class="device desktop">
+          <div class="device-bar"><i></i><i></i><i></i><span class="url">mindlex.ai/register</span></div>
+          <div class="auth-shell">
+            <div class="auth-card">
+              <div class="logo-row"><div class="m-logo"><span class="dot">M</span> Mindlex</div></div>
+              <h2>Create your account</h2>
+              <p class="subtitle">Free forever, no credit card required.</p>
+
+              <div class="error-banner">Please fix the following 2 errors before continuing.</div>
+
+              <div class="m-field">
+                <label class="m-label">Full name</label>
+                <input class="m-input" value="Promise Tran" />
+              </div>
+              <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+                <div class="m-field">
+                  <label class="m-label">Email</label>
+                  <input class="m-input" value="promise@mindlex.ai" />
+                </div>
+                <div class="m-field">
+                  <label class="m-label">Date of birth</label>
+                  <input class="m-input" value="15/05/1995" />
+                </div>
+              </div>
+              <div class="m-field">
+                <label class="m-label">Password</label>
+                <input class="m-input" type="password" value="••••••" style="border-color: var(--danger);" />
+                <div class="m-error">Must be at least 8 chars with 1 number and 1 symbol.</div>
+              </div>
+              <div class="m-field">
+                <label class="m-label">Confirm password</label>
+                <input class="m-input" type="password" value="••••••••" />
+              </div>
+              <div class="check-row"><input type="checkbox" checked /> <span>I have read and agree to the <a href="#">Terms of Service</a>.</span></div>
+              <div class="check-row"><input type="checkbox" /> <span style="color: var(--danger);">I have read and agree to the <a href="#">Privacy Policy</a>.</span></div>
+              <button class="m-btn primary full">Create account</button>
+
+              <div class="auth-divider">or sign up with</div>
+              <div class="social-row">
+                <button class="social-btn">🟦 Google</button>
+                <button class="social-btn">🟧 Microsoft</button>
+              </div>
+              <div class="form-foot">Already have an account? <a href="#">Sign in</a></div>
+            </div>
+          </div>
+        </div>
+        <div class="device mobile">
+          <div class="device-bar"><i></i><i></i><i></i><span class="url">mindlex.ai/register</span></div>
+          <div class="auth-shell" style="padding:20px 14px;">
+            <div class="auth-card">
+              <h2 style="font-size:22px;">Create account</h2>
+              <p class="subtitle" style="font-size:12px;">Free forever.</p>
+              <div class="m-field"><label class="m-label">Full name</label><input class="m-input" value="Promise Tran"/></div>
+              <div class="m-field"><label class="m-label">Email</label><input class="m-input" value="promise@mindlex.ai"/></div>
+              <div class="m-field"><label class="m-label">Password</label><input class="m-input" type="password" value="••••••"/></div>
+              <button class="m-btn primary full">Continue</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ SCREEN 3 — EMAIL VERIFICATION ============ -->
+    <div class="screen" id="s3" data-title="Screen 3 — Email Verification" data-meta="UM3 · Verify email + resend with 60s countdown" data-issues="UM3">
+      <div class="stage">
+        <div class="device desktop">
+          <div class="device-bar"><i></i><i></i><i></i><span class="url">mindlex.ai/verify-email</span></div>
+          <div class="auth-shell">
+            <div class="auth-card" style="text-align:center; max-width: 500px;">
+              <div style="font-size: 60px; margin-bottom: 12px;">📧</div>
+              <h2>Check your email</h2>
+              <p class="subtitle">We sent a verification link to <strong>promise@mindlex.ai</strong></p>
+              <div style="background:#fffbf2; border-radius: var(--radius); padding: 18px; margin: 20px 0; font-size: 13.5px; color: var(--text-muted);">
+                Click the link in the email to verify your account. The link will expire in 24 hours.
+              </div>
+              <button class="m-btn outline full" disabled style="opacity:0.5;">Resend in 0:47</button>
+              <div class="form-foot">Already verified? <a href="#">Go to dashboard →</a></div>
+            </div>
+          </div>
+        </div>
+        <div class="device mobile">
+          <div class="device-bar"><i></i><i></i><i></i><span class="url">/verify-email</span></div>
+          <div class="auth-shell" style="padding:20px 14px;">
+            <div class="auth-card" style="text-align:center;">
+              <div style="font-size: 44px; margin-bottom: 8px;">📧</div>
+              <h2 style="font-size:20px;">Check your email</h2>
+              <p class="subtitle">Sent to promise@mindlex.ai</p>
+              <button class="m-btn outline full" disabled style="opacity:0.5;">Resend in 0:47</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ SCREEN 4 — LOGIN ============ -->
+    <div class="screen" id="s4" data-title="Screen 4 — Login" data-meta="UM4, UM5, UM15 · Email/password + social login + error handling" data-issues="UM4|UM5|UM15">
+      <div class="stage">
+        <div class="device desktop">
+          <div class="device-bar"><i></i><i></i><i></i><span class="url">mindlex.ai/login</span></div>
+          <div class="auth-shell">
+            <div class="auth-card">
+              <div class="logo-row"><div class="m-logo"><span class="dot">M</span> Mindlex</div></div>
+              <h2>Welcome back</h2>
+              <p class="subtitle">Sign in to continue to your dashboard.</p>
+              <div class="error-banner">Invalid email or password.</div>
+              <div class="m-field"><label class="m-label">Email</label><input class="m-input" value="promise@mindlex.ai"/></div>
+              <div class="m-field"><label class="m-label">Password</label><input class="m-input" type="password" value="••••••••" /></div>
+              <div style="display:flex; justify-content:space-between; margin-bottom: 16px;">
+                <label style="font-size:13px;"><input type="checkbox" checked /> Remember me</label>
+                <a href="#" style="font-size:13px; color: var(--navy);">Forgot password?</a>
+              </div>
+              <button class="m-btn primary full">Sign in</button>
+              <div class="auth-divider">or continue with</div>
+              <div class="social-row">
+                <button class="social-btn">🟦 Google</button>
+                <button class="social-btn">🟧 Microsoft</button>
+              </div>
+              <div class="form-foot">New here? <a href="#">Create an account</a></div>
+            </div>
+          </div>
+        </div>
+        <div class="device mobile">
+          <div class="device-bar"><i></i><i></i><i></i><span class="url">/login</span></div>
+          <div class="auth-shell" style="padding:20px 14px;">
+            <div class="auth-card">
+              <h2 style="font-size:22px;">Welcome back</h2>
+              <p class="subtitle" style="font-size:12px;">Sign in to continue</p>
+              <div class="m-field"><label class="m-label">Email</label><input class="m-input" value="promise@mindlex.ai"/></div>
+              <div class="m-field"><label class="m-label">Password</label><input class="m-input" type="password" value="••••••••"/></div>
+              <button class="m-btn primary full">Sign in</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ SCREEN 5 — RESET PASSWORD ============ -->
+    <div class="screen" id="s5" data-title="Screen 5 — Forgot / Reset Password" data-meta="UM6 · Email submit + reset form" data-issues="UM6">
+      <div class="stage">
+        <div class="device desktop">
+          <div class="device-bar"><i></i><i></i><i></i><span class="url">mindlex.ai/reset-password</span></div>
+          <div class="auth-shell">
+            <div class="auth-card">
+              <div class="logo-row"><div class="m-logo"><span class="dot">M</span> Mindlex</div></div>
+              <h2>Set a new password</h2>
+              <p class="subtitle">Pick a strong password you haven't used before.</p>
+              <div class="m-field">
+                <label class="m-label">New password</label>
+                <input class="m-input" type="password" value="••••••••••" />
+                <div style="font-size:11.5px; color:var(--text-muted); margin-top:5px;">✓ 8+ characters · ✓ 1 number · ✓ 1 symbol</div>
+              </div>
+              <div class="m-field"><label class="m-label">Confirm password</label><input class="m-input" type="password" value="••••••••••" /></div>
+              <button class="m-btn primary full">Reset password</button>
+              <div class="form-foot">Remembered it? <a href="#">Back to sign in</a></div>
+            </div>
+          </div>
+        </div>
+        <div class="device mobile">
+          <div class="device-bar"><i></i><i></i><i></i><span class="url">/reset-password</span></div>
+          <div class="auth-shell" style="padding:20px 14px;">
+            <div class="auth-card">
+              <h2 style="font-size:22px;">New password</h2>
+              <div class="m-field"><label class="m-label">New password</label><input class="m-input" type="password" value="••••••••"/></div>
+              <div class="m-field"><label class="m-label">Confirm</label><input class="m-input" type="password" value="••••••••"/></div>
+              <button class="m-btn primary full">Reset</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ SCREEN 6 — ONBOARDING ============ -->
+    <div class="screen" id="s6" data-title="Screen 6 — Onboarding" data-meta="UM19 · First-login guided tour with 5 feature cards" data-issues="UM19">
+      <div class="stage">
+        <div class="device desktop">
+          <div class="device-bar"><i></i><i></i><i></i><span class="url">mindlex.ai/onboarding</span></div>
+          <div class="m-app">
+            <div class="m-topbar">
+              <div class="m-logo"><span class="dot">M</span> Mindlex</div>
+              <div class="m-nav">
+                <a href="#" class="active">Chatbot</a><a href="#">News</a><a href="#">Drive</a>
+              </div>
+              <div class="m-topbar-right">
+                <span class="m-quota">5 / 5 questions today</span>
+                <div class="m-avatar">P</div>
+              </div>
+            </div>
+            <div style="padding: 40px 60px;">
+              <div style="text-align:center; margin-bottom: 18px;">
+                <h1 style="font-family:var(--font-display); font-size:30px; color: var(--navy);">Welcome to Mindlex, Promise 👋</h1>
+                <p style="color:var(--text-muted); font-size:15px; margin-top:6px;">Five tools that turn legal complexity into clarity. Pick any to begin.</p>
+              </div>
+              <div class="onboard-grid">
+                <div class="onboard-card"><span class="emoji">⚖️</span><h5>Legal Assistant</h5><p>Ask any legal question</p></div>
+                <div class="onboard-card"><span class="emoji">📰</span><h5>Legal News</h5><p>Personalized updates</p></div>
+                <div class="onboard-card"><span class="emoji">📂</span><h5>Legal Drive</h5><p>Store & share docs</p></div>
+                <div class="onboard-card"><span class="emoji">✍️</span><h5>Legal Draft</h5><p>Generate documents</p></div>
+                <div class="onboard-card"><span class="emoji">🛡️</span><h5>Legal Compliance</h5><p>Audit your contracts</p></div>
+              </div>
+              <div class="ex-questions">
+                <h5>Try one of these to get started:</h5>
+                <div>What are my GDPR obligations as a SaaS founder in the EU?</div>
+                <div>Review this NDA for unfair clauses</div>
+                <div>Draft a freelance contract for a UK developer</div>
+                <div>What changed in EU AI Act this month?</div>
+              </div>
+              <div style="text-align:center; margin-top:20px;">
+                <button class="m-btn primary">Get started</button>
+                <button class="m-btn ghost">Skip tour</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="device mobile">
+          <div class="device-bar"><i></i><i></i><i></i><span class="url">/onboarding</span></div>
+          <div class="m-app">
+            <div class="m-topbar"><div class="m-logo"><span class="dot">M</span></div><div class="mobile-burger">≡</div></div>
+            <div style="padding: 20px;">
+              <h1 style="font-family:var(--font-display); font-size:22px; color: var(--navy);">Welcome 👋</h1>
+              <p style="color:var(--text-muted); font-size:13px; margin: 4px 0 16px;">Pick a feature to begin.</p>
+              <div class="onboard-grid">
+                <div class="onboard-card"><span class="emoji">⚖️</span><h5>Assistant</h5></div>
+                <div class="onboard-card"><span class="emoji">📰</span><h5>News</h5></div>
+                <div class="onboard-card"><span class="emoji">📂</span><h5>Drive</h5></div>
+                <div class="onboard-card"><span class="emoji">✍️</span><h5>Draft</h5></div>
+              </div>
+              <button class="m-btn primary full" style="margin-top:14px;">Get started</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ SCREEN 7 — CHATBOT (the core) ============ -->
+    <div class="screen" id="s7" data-title="Screen 7 — Legal Chatbot (★ core)" data-meta="LC1-11, DC1-5, DA1, DD1-3 · Threads + chat + sources + tone + compliance + drafting" data-issues="LC1|LC2|LC3|LC4|LC5|LC6|LC7|LC8|LC9|LC10|LC11|DC1|DC2|DC3|DC5|DA1|DD1|DD2|DD3">
+      <div class="stage">
+        <div class="device desktop">
+          <div class="device-bar"><i></i><i></i><i></i><span class="url">mindlex.ai/chatbot</span></div>
+          <div class="m-app">
+            <div class="m-topbar">
+              <div class="m-logo"><span class="dot">M</span> Mindlex</div>
+              <div class="m-nav">
+                <a href="#" class="active">Chatbot</a>
+                <a href="#">News <span class="reddot"></span></a>
+                <a href="#">Drive</a>
+                <a href="#">Plans</a>
+              </div>
+              <div class="m-topbar-right">
+                <span class="m-quota">42 / unlimited</span>
+                <div class="m-avatar">P</div>
+              </div>
+            </div>
+            <div class="chat-shell">
+              <!-- History sidebar (LC8) -->
+              <div class="chat-history">
+                <button class="m-btn primary new-btn full sm">+ New chat</button>
+                <h4>Today</h4>
+                <div class="thread active">
+                  <div class="t1">GDPR obligations for SaaS</div>
+                  <div class="t2">Just now</div>
+                </div>
+                <div class="thread">
+                  <div class="t1">NDA review — VendorX</div>
+                  <div class="t2">2h ago</div>
+                </div>
+                <h4>Yesterday</h4>
+                <div class="thread"><div class="t1">UK freelance contract draft</div><div class="t2">Yesterday</div></div>
+                <div class="thread"><div class="t1">Cyprus VAT rules…</div><div class="t2">Yesterday</div></div>
+                <h4>Earlier</h4>
+                <div class="thread"><div class="t1">Trademark vs copyright</div><div class="t2">3 days ago</div></div>
+              </div>
+
+              <!-- Main chat -->
+              <div class="chat-main">
+                <div class="chat-header">
+                  <h3>GDPR obligations for SaaS</h3>
+                  <div class="badges">
+                    <span class="chip success">⚖️ Cyprus jurisdiction</span>
+                    <span class="chip">Plain tone</span>
+                  </div>
+                </div>
+
+                <div class="toast success">✓ All detected personal data has been removed.</div>
+
+                <div class="chat-stream">
+                  <div class="msg user">
+                    <div class="msg-bubble">What are my main GDPR obligations as a SaaS founder selling to EU customers?</div>
+                  </div>
+
+                  <div class="msg assistant">
+                    <div class="msg-bubble">
+                      <strong>Short answer:</strong> You need a lawful basis to process data, a Privacy Policy, a Data Processing Agreement (DPA) with sub-processors, and a way to handle data subject requests.<br/><br/>
+                      The four pillars are:
+                      <ol style="padding-left:18px; margin-top:6px;">
+                        <li><strong>Lawful basis</strong> — usually "contract" or "consent" depending on the feature.</li>
+                        <li><strong>Transparency</strong> — clear, plain-language privacy notices at collection.</li>
+                        <li><strong>Rights handling</strong> — access, deletion, portability within 30 days.</li>
+                        <li><strong>Security</strong> — appropriate technical & organizational measures (encryption, access control, breach reporting).</li>
+                      </ol>
+                      <div class="sources">
+                        <strong>Sources (Cyprus-prioritized):</strong>
+                        <a href="#">↗ Cyprus DPA — Guidance for SMEs (2024)</a>
+                        <a href="#">↗ EU GDPR Art. 6, 12-22</a>
+                        <span style="color:var(--text-muted)">• Internal: Mindlex Compliance Playbook</span>
+                        <div class="disclaimer">This is general information, not legal advice. Consult a qualified lawyer for your specific situation.</div>
+                      </div>
+                    </div>
+                    <div class="msg-meta">
+                      <span class="ic" title="Copy">📋</span>
+                      <span class="ic active" title="Liked">👍</span>
+                      <span class="ic" title="Dislike">👎</span>
+                      <span style="margin-left:auto;">10:23 AM · Cyprus jurisdiction</span>
+                    </div>
+                  </div>
+
+                  <div class="msg user">
+                    <div class="msg-bubble">I just uploaded my draft Privacy Policy. Can you check it against GDPR?</div>
+                  </div>
+
+                  <div class="msg assistant">
+                    <div class="msg-bubble">
+                      I reviewed <strong>privacy-policy-v2.docx</strong>. Here's what I found:
+                      <div class="compliance-block">
+                        <h5>⚖️ Compliance check (2 issues)</h5>
+                        <div class="issue">
+                          <strong>1. [Missing] Lawful basis disclosure</strong><br/>
+                          <em>Source: §3 Data Collection</em> — Your policy doesn't state the lawful basis for processing.<br/>
+                          <strong>Suggested clause:</strong> "We process your personal data under Article 6(1)(b) GDPR — performance of the contract you entered into with us."
+                        </div>
+                        <div class="issue">
+                          <strong>2. [Missing] Data retention period</strong><br/>
+                          <em>Source: §5 Storage</em> — No retention period mentioned.<br/>
+                          <strong>Suggested clause:</strong> "We retain account data for 7 years after the contract ends, unless legal obligations require longer."
+                        </div>
+                      </div>
+                      <div class="compliance-block" style="background:#fef2f2; border-left-color:var(--danger);">
+                        <h5>🛡️ Risk identification (1 high)</h5>
+                        <div>
+                          <strong>HIGH — Broad sub-processor transfer clause</strong><br/>
+                          <em>Source: §7 Third Parties</em> — Your clause allows transfer to "any service provider", which violates Art. 28(2).<br/>
+                          <strong>Suggested rewrite:</strong> "We share data only with sub-processors listed at /sub-processors. We will provide 30 days' notice before adding any new sub-processor."
+                        </div>
+                      </div>
+                      <div style="margin-top:14px; display:flex; gap:8px;">
+                        <button class="m-btn gold sm">📥 Download Compliance Report</button>
+                        <button class="m-btn outline sm">💾 Save to Drive</button>
+                      </div>
+                    </div>
+                    <div class="msg-meta">
+                      <span class="ic" title="Copy">📋</span>
+                      <span class="ic" title="Like">👍</span>
+                      <span class="ic" title="Dislike">👎</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="chat-composer">
+                  <div class="composer-toolbar">
+                    <span class="chip warn">📎 privacy-policy-v2.docx ✕</span>
+                    <span style="font-size:11.5px; color:var(--text-light);">DOCX · 12.4 KB</span>
+                    <div class="tone-toggle">
+                      <button class="active">Plain</button>
+                      <button>Technical</button>
+                    </div>
+                  </div>
+                  <div class="composer-input">
+                    <button class="m-btn ghost sm" title="Mode"><span style="font-size:16px;">+</span></button>
+                    <textarea placeholder="Ask a legal question or upload a document for compliance check…"></textarea>
+                    <button class="send-btn">↑</button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Right reference widget (LC11) -->
+              <div class="chat-ref-widget">
+                <h5>Reference</h5>
+                <div style="font-size:12px; color:var(--text-muted); margin-bottom:14px;">
+                  Mindlex provides AI-assisted legal information. Always verify with a qualified lawyer.
+                </div>
+                <h5>Quick links</h5>
+                <a href="#">📋 Terms of Service</a>
+                <a href="#">🔒 Privacy Policy</a>
+                <a href="#">📜 Usage Policy</a>
+                <a href="#">💼 LinkedIn</a>
+                <div style="margin-top:16px; padding-top:14px; border-top:1px solid var(--border); font-size:11px; color:var(--text-light);">
+                  © 2025 MINDLEX LIMITED
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="device mobile">
+          <div class="device-bar"><i></i><i></i><i></i><span class="url">/chatbot</span></div>
+          <div class="m-app">
+            <div class="m-topbar"><div class="mobile-burger">≡</div><div class="m-logo"><span class="dot">M</span></div><div class="m-avatar" style="margin-left:auto;">P</div></div>
+            <div class="chat-shell">
+              <div class="chat-main">
+                <div class="chat-header"><h3 style="font-size:14px;">GDPR for SaaS</h3><span class="chip">Plain</span></div>
+                <div class="chat-stream">
+                  <div class="msg user"><div class="msg-bubble">GDPR obligations for SaaS?</div></div>
+                  <div class="msg assistant">
+                    <div class="msg-bubble">You need: lawful basis, privacy policy, DPA with sub-processors, and rights handling within 30 days.
+                      <div class="sources"><strong>Sources:</strong><a href="#">↗ Cyprus DPA</a><div class="disclaimer">Not legal advice.</div></div>
+                    </div>
+                    <div class="msg-meta"><span class="ic">📋</span><span class="ic active">👍</span><span class="ic">👎</span></div>
+                  </div>
+                </div>
+                <div class="chat-composer">
+                  <div class="composer-input">
+                    <button class="m-btn ghost sm">+</button>
+                    <textarea placeholder="Ask…"></textarea>
+                    <button class="send-btn">↑</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ SCREEN 8 — NEWS FEED ============ -->
+    <div class="screen" id="s8" data-title="Screen 8 — News Feed" data-meta="LU3, LU4 · Cards with read state + red dot trigger" data-issues="LU3|LU4">
+      <div class="stage">
+        <div class="device desktop">
+          <div class="device-bar"><i></i><i></i><i></i><span class="url">mindlex.ai/news</span></div>
+          <div class="m-app">
+            <div class="m-topbar">
+              <div class="m-logo"><span class="dot">M</span> Mindlex</div>
+              <div class="m-nav">
+                <a href="#">Chatbot</a>
+                <a href="#" class="active">News</a>
+                <a href="#">Drive</a>
+                <a href="#">Plans</a>
+              </div>
+              <div class="m-topbar-right"><div class="m-avatar">P</div></div>
+            </div>
+            <div class="dashboard">
+              <aside class="side">
+                <div class="side-section">News</div>
+                <a href="#" class="active"><span class="ic">📰</span> Feed</a>
+                <a href="#"><span class="ic">⚙️</span> Topics</a>
+                <a href="#"><span class="ic">🔔</span> Notifications</a>
+              </aside>
+              <div class="main">
+                <h1>Legal news</h1>
+                <div class="crumb">Personalized for your interests · refreshed daily at 04:00 UTC</div>
+
+                <div class="news-grid">
+                  <div class="news-card unread">
+                    <div class="news-date"><div class="d">14</div><div class="m">May</div></div>
+                    <div>
+                      <h4>EU AI Act — Phase 2 enforcement begins for high-risk systems</h4>
+                      <p class="summary">Providers of high-risk AI systems must now complete conformity assessments. Penalties up to €15M or 3% of global turnover.</p>
+                      <div class="tags"><span class="chip">AI</span><span class="chip">Compliance</span><span class="chip">EU</span></div>
+                    </div>
+                    <div><span class="chip gold">Unread</span></div>
+                  </div>
+                  <div class="news-card unread">
+                    <div class="news-date"><div class="d">13</div><div class="m">May</div></div>
+                    <div>
+                      <h4>Cyprus DPA publishes SME GDPR self-assessment guide</h4>
+                      <p class="summary">New 12-page guide helps small businesses verify their data processing compliance without external counsel.</p>
+                      <div class="tags"><span class="chip">GDPR</span><span class="chip">Cyprus</span><span class="chip">SME</span></div>
+                    </div>
+                    <div><span class="chip gold">Unread</span></div>
+                  </div>
+                  <div class="news-card">
+                    <div class="news-date"><div class="d">12</div><div class="m">May</div></div>
+                    <div>
+                      <h4>UK Online Safety Act — Ofcom releases enforcement framework</h4>
+                      <p class="summary">Platforms must comply by August 2026 or face daily fines starting from £18m.</p>
+                      <div class="tags"><span class="chip">UK</span><span class="chip">Online Safety</span></div>
+                    </div>
+                  </div>
+                  <div class="news-card">
+                    <div class="news-date"><div class="d">10</div><div class="m">May</div></div>
+                    <div>
+                      <h4>CJEU ruling on cross-border data transfers (Case C-217/24)</h4>
+                      <p class="summary">Standard Contractual Clauses upheld for transfers to "adequate third countries"; clarifies supplementary measures.</p>
+                      <div class="tags"><span class="chip">Data Transfer</span><span class="chip">CJEU</span></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="device mobile">
+          <div class="device-bar"><i></i><i></i><i></i><span class="url">/news</span></div>
+          <div class="m-app">
+            <div class="m-topbar"><div class="mobile-burger">≡</div><div class="m-logo"><span class="dot">M</span></div><div class="m-avatar" style="margin-left:auto;">P</div></div>
+            <div class="main">
+              <h1 style="font-family:var(--font-display);font-size:22px;color:var(--navy);">News</h1>
+              <div class="crumb">Refreshed today</div>
+              <div class="news-grid">
+                <div class="news-card unread">
+                  <div class="news-date"><div class="d">14</div><div class="m">May</div></div>
+                  <div><h4>EU AI Act — Phase 2 begins</h4><div class="tags"><span class="chip">AI</span></div></div>
+                </div>
+                <div class="news-card unread">
+                  <div class="news-date"><div class="d">13</div><div class="m">May</div></div>
+                  <div><h4>Cyprus DPA SME GDPR guide</h4><div class="tags"><span class="chip">GDPR</span></div></div>
+                </div>
+                <div class="news-card">
+                  <div class="news-date"><div class="d">12</div><div class="m">May</div></div>
+                  <div><h4>UK Online Safety enforcement</h4><div class="tags"><span class="chip">UK</span></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ SCREEN 9 — NEWS TOPICS ============ -->
+    <div class="screen" id="s9" data-title="Screen 9 — News Topics" data-meta="LU1, LU2 · Premium topic chip selector" data-issues="LU1|LU2">
+      <div class="stage">
+        <div class="device desktop">
+          <div class="device-bar"><i></i><i></i><i></i><span class="url">mindlex.ai/news/topics</span></div>
+          <div class="m-app">
+            <div class="m-topbar">
+              <div class="m-logo"><span class="dot">M</span> Mindlex</div>
+              <div class="m-nav">
+                <a href="#">Chatbot</a>
+                <a href="#" class="active">News</a>
+                <a href="#">Drive</a>
+                <a href="#">Plans</a>
+              </div>
+              <div class="m-topbar-right"><div class="m-avatar">P</div></div>
+            </div>
+            <div class="dashboard">
+              <aside class="side">
+                <div class="side-section">News</div>
+                <a href="#"><span class="ic">📰</span> Feed</a>
+                <a href="#" class="active"><span class="ic">⚙️</span> Topics</a>
+              </aside>
+              <div class="main">
+                <h1>Your topic interests</h1>
+                <div class="crumb">Pick up to 10 topics — your feed adapts in real time.</div>
+
+                <div style="background:#fffbf2; border:1px solid #f6e7c2; border-radius:var(--radius); padding:14px; margin-bottom:18px; font-size:13.5px; color: var(--navy);">
+                  <strong>Premium feature</strong> — Free users see the default Cyprus law feed.
+                </div>
+
+                <div style="display:flex; flex-wrap:wrap; gap:10px; max-width:680px;">
+                  <span class="chip active">GDPR &amp; Data Privacy ✓</span>
+                  <span class="chip active">AI Regulation ✓</span>
+                  <span class="chip">Employment Law</span>
+                  <span class="chip active">Contract Law ✓</span>
+                  <span class="chip">Intellectual Property</span>
+                  <span class="chip">Tax &amp; VAT</span>
+                  <span class="chip">Corporate Compliance</span>
+                  <span class="chip">Consumer Protection</span>
+                  <span class="chip active">Cyprus Law ✓</span>
+                  <span class="chip">UK Law</span>
+                </div>
+
+                <div style="margin-top: 24px; display:flex; gap:10px;">
+                  <button class="m-btn primary">Save interests</button>
+                  <button class="m-btn outline">Clear all</button>
+                </div>
+
+                <div class="modal-demo" style="position:relative;inset:auto;background:transparent;margin-top:24px;display:block;pointer-events:none;">
+                  <div class="modal-box" style="margin:0; max-width: 460px;">
+                    <h4>Remove all selected topics?</h4>
+                    <p>Your feed will revert to the default Cyprus law selection until you pick new interests.</p>
+                    <div class="actions">
+                      <button class="m-btn outline">Cancel</button>
+                      <button class="m-btn danger">Confirm clear</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="device mobile">
+          <div class="device-bar"><i></i><i></i><i></i><span class="url">/news/topics</span></div>
+          <div class="m-app">
+            <div class="m-topbar"><div class="mobile-burger">≡</div><div class="m-logo"><span class="dot">M</span></div></div>
+            <div class="main">
+              <h1 style="font-family:var(--font-display);font-size:20px;color:var(--navy);">Topics</h1>
+              <div style="display:flex; flex-wrap:wrap; gap:8px; margin-top:12px;">
+                <span class="chip active">GDPR ✓</span>
+                <span class="chip active">AI Reg ✓</span>
+                <span class="chip">Employment</span>
+                <span class="chip active">Contracts ✓</span>
+                <span class="chip">IP</span>
+                <span class="chip">Tax</span>
+              </div>
+              <button class="m-btn primary full" style="margin-top:16px;">Save</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ SCREEN 10 — MY DRIVE ============ -->
+    <div class="screen" id="s10" data-title="Screen 10 — My Drive" data-meta="CM1-4, DA2 · Files, tags, sharing, anonymization status" data-issues="CM1|CM2|CM3|CM4|DA2">
+      <div class="stage">
+        <div class="device desktop">
+          <div class="device-bar"><i></i><i></i><i></i><span class="url">mindlex.ai/drive</span></div>
+          <div class="m-app">
+            <div class="m-topbar">
+              <div class="m-logo"><span class="dot">M</span> Mindlex</div>
+              <div class="m-nav">
+                <a href="#">Chatbot</a>
+                <a href="#">News</a>
+                <a href="#" class="active">Drive</a>
+                <a href="#">Plans</a>
+              </div>
+              <div class="m-topbar-right"><div class="m-avatar">P</div></div>
+            </div>
+            <div class="dashboard">
+              <aside class="side">
+                <div class="side-section">Drive</div>
+                <a href="#" class="active"><span class="ic">📁</span> My files</a>
+                <a href="#"><span class="ic">👥</span> Shared with me</a>
+                <a href="#"><span class="ic">🗑️</span> Trash</a>
+              </aside>
+              <div class="main">
+                <h1>My Drive</h1>
+                <div class="crumb">23 files · 142 MB of 500 MB used</div>
+
+                <div class="dropzone">
+                  <div class="ic">📥</div>
+                  Drag &amp; drop files here, or <a href="#" style="color:var(--navy);font-weight:600;">browse</a> · Max 5 files, 25 MB each
+                </div>
+
+                <div class="drive-toolbar">
+                  <input class="m-input" placeholder="Search files…" style="max-width:240px;" />
+                  <select class="m-input" style="max-width:160px;"><option>All tags</option><option>GDPR</option><option>NDA</option></select>
+                  <div class="quota-bar"><div class="fill" style="width:28%"></div></div>
+                  <span style="font-size:12px; color: var(--text-muted);">142 / 500 MB</span>
+                </div>
+
+                <div class="m-card flat" style="padding:0; overflow:hidden;">
+                  <table class="m-table">
+                    <thead>
+                      <tr><th>Name</th><th>Tags</th><th>Size</th><th>Modified</th><th>Source</th><th></th></tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td><strong>📄 privacy-policy-v2.docx</strong><br/><span style="font-size:11px;color:var(--success);">✓ PII anonymized</span></td>
+                        <td><span class="chip">GDPR</span> <span class="chip">Policy</span></td>
+                        <td>12.4 KB</td>
+                        <td>2h ago</td>
+                        <td><span class="chip success">Own</span></td>
+                        <td>⋯</td>
+                      </tr>
+                      <tr>
+                        <td><strong>📄 vendor-nda-draft.docx</strong></td>
+                        <td><span class="chip">NDA</span></td>
+                        <td>8.1 KB</td>
+                        <td>Yesterday</td>
+                        <td><span class="chip success">Own</span></td>
+                        <td>⋯</td>
+                      </tr>
+                      <tr>
+                        <td><strong>📄 contractor-agreement.docx</strong><br/><span style="font-size:11px;color:var(--text-muted);">No PII detected</span></td>
+                        <td><span class="chip">Contract</span></td>
+                        <td>22.0 KB</td>
+                        <td>3 days ago</td>
+                        <td><span class="chip warn">Shared</span></td>
+                        <td>⋯</td>
+                      </tr>
+                      <tr>
+                        <td><strong>📄 cyprus-vat-notes.pdf</strong></td>
+                        <td><span class="chip">Tax</span></td>
+                        <td>148 KB</td>
+                        <td>1 week ago</td>
+                        <td><span class="chip success">Own</span></td>
+                        <td>⋯</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="device mobile">
+          <div class="device-bar"><i></i><i></i><i></i><span class="url">/drive</span></div>
+          <div class="m-app">
+            <div class="m-topbar"><div class="mobile-burger">≡</div><div class="m-logo"><span class="dot">M</span></div></div>
+            <div class="main">
+              <h1 style="font-family:var(--font-display);font-size:22px;color:var(--navy);">Drive</h1>
+              <div class="crumb">23 files · 142 MB</div>
+              <div class="dropzone" style="padding:18px;"><div class="ic">📥</div>Tap to upload</div>
+              <div class="m-card" style="margin-top:10px;">
+                <div style="font-weight:600;">📄 privacy-policy-v2.docx</div>
+                <div style="font-size:11px;color:var(--success);">✓ PII anonymized · 12.4 KB</div>
+              </div>
+              <div class="m-card" style="margin-top:10px;">
+                <div style="font-weight:600;">📄 vendor-nda-draft.docx</div>
+                <div style="font-size:11px;color:var(--text-muted);">8.1 KB</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ SCREEN 11 — MY ACCOUNT ============ -->
+    <div class="screen" id="s11" data-title="Screen 11 — My Account" data-meta="UM7, UM9, UM16, LC6 · Profile, password, tone, download data, logout" data-issues="UM7|UM9|UM16|LC6">
+      <div class="stage">
+        <div class="device desktop">
+          <div class="device-bar"><i></i><i></i><i></i><span class="url">mindlex.ai/account/profile</span></div>
+          <div class="m-app">
+            <div class="m-topbar">
+              <div class="m-logo"><span class="dot">M</span> Mindlex</div>
+              <div class="m-nav"><a href="#">Chatbot</a><a href="#">News</a><a href="#">Drive</a></div>
+              <div class="m-topbar-right"><div class="m-avatar">P</div></div>
+            </div>
+            <div class="dashboard">
+              <aside class="side">
+                <div class="side-section">Account</div>
+                <a href="#" class="active"><span class="ic">👤</span> Profile</a>
+                <a href="#"><span class="ic">💳</span> Subscription</a>
+                <a href="#"><span class="ic">💰</span> Billing</a>
+                <a href="#"><span class="ic">🔒</span> Privacy</a>
+                <a href="#"><span class="ic">🚪</span> Log out</a>
+              </aside>
+              <div class="main">
+                <h1>My Account</h1>
+                <div class="crumb">Manage your profile and preferences</div>
+
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:18px;">
+                  <div class="m-card">
+                    <h3 style="color:var(--navy); margin-bottom:14px;">Profile</h3>
+                    <div style="display:grid; gap:12px;">
+                      <div><div class="m-label">Email</div><div style="color:var(--text);">promise@mindlex.ai <span class="chip" style="margin-left:8px;">view only</span></div></div>
+                      <div><div class="m-label">Full name</div><div style="display:flex; justify-content:space-between;"><span>Promise Tran</span><button class="m-btn outline sm">Edit</button></div></div>
+                      <div><div class="m-label">Date of birth</div><div>15 / 05 / 1995</div></div>
+                      <div><div class="m-label">Role</div><div><span class="chip gold">Premium</span></div></div>
+                    </div>
+                  </div>
+                  <div class="m-card">
+                    <h3 style="color:var(--navy); margin-bottom:14px;">Preferences</h3>
+                    <div class="m-field">
+                      <div class="m-label">Chatbot tone</div>
+                      <div class="tone-toggle" style="display:inline-flex;background:#eef0f6;border-radius:999px;padding:3px;">
+                        <button style="background:#fff;color:var(--navy);border:none;padding:6px 14px;border-radius:999px;font-weight:500;cursor:pointer;font-family:inherit;">Plain</button>
+                        <button style="background:none;border:none;padding:6px 14px;color:var(--text-muted);cursor:pointer;font-family:inherit;">Technical</button>
+                      </div>
+                    </div>
+                    <button class="m-btn outline full" style="margin-bottom:10px;">🔑 Change password</button>
+                    <button class="m-btn outline full" style="margin-bottom:10px;">📥 Download my data (.txt)</button>
+                    <button class="m-btn danger full" style="margin-top:8px;">🚪 Log out</button>
+                  </div>
+                </div>
+
+                <div class="modal-demo" style="position:relative;inset:auto;background:transparent;margin-top:18px;display:block;pointer-events:none;">
+                  <div class="modal-box" style="margin:0; max-width: 380px;">
+                    <h4>Are you sure you want to log out?</h4>
+                    <p>You'll need to sign in again to access your dashboard.</p>
+                    <div class="actions">
+                      <button class="m-btn outline">No, stay</button>
+                      <button class="m-btn primary">Yes, log out</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="device mobile">
+          <div class="device-bar"><i></i><i></i><i></i><span class="url">/account</span></div>
+          <div class="m-app">
+            <div class="m-topbar"><div class="mobile-burger">≡</div><div class="m-logo"><span class="dot">M</span></div></div>
+            <div class="main">
+              <h1 style="font-family:var(--font-display);font-size:22px;color:var(--navy);">My Account</h1>
+              <div class="m-card" style="margin-top:12px;">
+                <div class="m-label">Email</div><div>promise@mindlex.ai</div>
+                <div class="m-label" style="margin-top:10px;">Name</div><div>Promise Tran</div>
+                <div style="margin-top:10px;"><span class="chip gold">Premium</span></div>
+              </div>
+              <button class="m-btn outline full" style="margin-top:10px;">🔑 Change password</button>
+              <button class="m-btn danger full" style="margin-top:10px;">🚪 Log out</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ SCREEN 12 — SUBSCRIPTION PLANS ============ -->
+    <div class="screen" id="s12" data-title="Screen 12 — Subscription Plans" data-meta="PB1, PB3, PB10 · 3 plans + currency + monthly/annual + upgrade CTAs" data-issues="PB1|PB3|PB10|PB11">
+      <div class="stage">
+        <div class="device desktop">
+          <div class="device-bar"><i></i><i></i><i></i><span class="url">mindlex.ai/account/subscription</span></div>
+          <div class="m-app">
+            <div class="m-topbar">
+              <div class="m-logo"><span class="dot">M</span> Mindlex</div>
+              <div class="m-nav"><a href="#">Chatbot</a><a href="#">News</a><a href="#">Drive</a></div>
+              <div class="m-topbar-right"><div class="m-avatar">P</div></div>
+            </div>
+            <div class="dashboard">
+              <aside class="side">
+                <div class="side-section">Account</div>
+                <a href="#"><span class="ic">👤</span> Profile</a>
+                <a href="#" class="active"><span class="ic">💳</span> Subscription</a>
+                <a href="#"><span class="ic">💰</span> Billing</a>
+              </aside>
+              <div class="main">
+                <h1>Subscription plans</h1>
+                <div class="crumb">You are on <strong>Plus (Monthly)</strong> — €19/month, next charge 15 Jun 2026</div>
+
+                <div style="display:flex; gap:12px; align-items:center; margin-bottom:24px;">
+                  <div class="tone-toggle" style="display:inline-flex;background:#eef0f6;border-radius:999px;padding:3px;">
+                    <button style="background:#fff;color:var(--navy);border:none;padding:6px 14px;border-radius:999px;font-weight:500;cursor:pointer;font-family:inherit;">Monthly</button>
+                    <button style="background:none;border:none;padding:6px 14px;color:var(--text-muted);cursor:pointer;font-family:inherit;">Annual <span class="chip gold" style="margin-left:4px;">−20%</span></button>
+                  </div>
+                  <select class="m-input" style="max-width:140px; margin-left:auto;">
+                    <option>EUR €</option>
+                    <option>GBP £</option>
+                    <option>USD $</option>
+                  </select>
+                </div>
+
+                <div class="plan-grid" style="grid-template-columns: repeat(3, 1fr);">
+                  <div class="plan-card">
+                    <h3>Free</h3>
+                    <div class="price">€0<small>/mo</small></div>
+                    <p style="color:var(--text-muted); font-size:13px;">For curious individuals</p>
+                    <ul>
+                      <li>5 chat questions / day</li>
+                      <li>Plain-English answers</li>
+                      <li>Public sources only</li>
+                    </ul>
+                    <button class="m-btn outline full" style="margin-top:14px;" disabled>—</button>
+                  </div>
+                  <div class="plan-card featured">
+                    <h3>Plus</h3>
+                    <div class="price">€19<small>/mo</small></div>
+                    <p style="color:var(--text-muted); font-size:13px;">For professionals</p>
+                    <ul>
+                      <li>Unlimited chat</li>
+                      <li>Technical tone toggle</li>
+                      <li>Source citations + history</li>
+                    </ul>
+                    <button class="m-btn outline full" style="margin-top:14px;" disabled>✓ Current plan</button>
+                  </div>
+                  <div class="plan-card">
+                    <h3>Premium</h3>
+                    <div class="price">€49<small>/mo</small></div>
+                    <p style="color:var(--text-muted); font-size:13px;">For teams</p>
+                    <ul>
+                      <li>Everything in Plus</li>
+                      <li>Document compliance check</li>
+                      <li>Drive + drafting + sharing</li>
+                    </ul>
+                    <button class="m-btn primary full" style="margin-top:14px;">Upgrade to Premium →</button>
+                  </div>
+                </div>
+                <div style="font-size:12px;color:var(--text-muted);margin-top:14px;text-align:center;">
+                  Prices may include applicable taxes based on your billing address.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="device mobile">
+          <div class="device-bar"><i></i><i></i><i></i><span class="url">/account/subscription</span></div>
+          <div class="m-app">
+            <div class="m-topbar"><div class="mobile-burger">≡</div><div class="m-logo"><span class="dot">M</span></div></div>
+            <div class="main">
+              <h1 style="font-family:var(--font-display);font-size:22px;color:var(--navy);">Plans</h1>
+              <div class="plan-grid">
+                <div class="plan-card featured">
+                  <h3>Plus</h3><div class="price">€19<small>/mo</small></div>
+                  <button class="m-btn outline full" disabled>Current</button>
+                </div>
+                <div class="plan-card">
+                  <h3>Premium</h3><div class="price">€49<small>/mo</small></div>
+                  <button class="m-btn primary full">Upgrade →</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ SCREEN 13 — CHECKOUT ============ -->
+    <div class="screen" id="s13" data-title="Screen 13 — Checkout (pre-Stripe)" data-meta="PB4, PB11 · Pre-checkout summary → Stripe handoff" data-issues="PB4|PB11">
+      <div class="stage">
+        <div class="device desktop">
+          <div class="device-bar"><i></i><i></i><i></i><span class="url">mindlex.ai/checkout?plan=premium</span></div>
+          <div class="m-app">
+            <div class="m-topbar">
+              <div class="m-logo"><span class="dot">M</span> Mindlex</div>
+              <div class="m-nav"></div>
+              <div class="m-topbar-right"><div class="m-avatar">P</div></div>
+            </div>
+            <div style="padding:48px 60px; max-width:760px; margin: 0 auto;">
+              <h1 style="font-family:var(--font-display);font-size:30px;color:var(--navy);">Confirm your subscription</h1>
+              <div class="crumb">Review your plan before continuing to secure payment.</div>
+
+              <div class="m-card" style="margin-top:18px; padding: 22px;">
+                <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                  <div>
+                    <h3 style="color:var(--navy);">Premium plan</h3>
+                    <p style="color:var(--text-muted); font-size:13.5px; margin-top:2px;">Unlimited chat · compliance · drafting · drive</p>
+                  </div>
+                  <div style="font-family:var(--font-display); font-size:30px; color:var(--navy);">€49<small style="font-size:13px;color:var(--text-muted);font-family:var(--font);">/mo</small></div>
+                </div>
+                <div style="border-top:1px solid var(--border); padding-top:14px; margin-top:14px;">
+                  <div style="display:flex; gap:12px; align-items:center; justify-content:space-between;">
+                    <div class="tone-toggle" style="display:inline-flex;background:#eef0f6;border-radius:999px;padding:3px;">
+                      <button style="background:#fff;color:var(--navy);border:none;padding:6px 14px;border-radius:999px;font-weight:500;cursor:pointer;font-family:inherit;">Monthly · €49</button>
+                      <button style="background:none;border:none;padding:6px 14px;color:var(--text-muted);cursor:pointer;font-family:inherit;">Annual · €470 (save €118)</button>
+                    </div>
+                    <div style="color:var(--text-muted);font-size:13px;">Currency: EUR €</div>
+                  </div>
+                </div>
+                <div style="border-top:1px solid var(--border); padding-top:14px; margin-top:14px;">
+                  <div style="display:flex; justify-content:space-between; font-size:14px;"><span>Subtotal</span><span>€49.00</span></div>
+                  <div style="display:flex; justify-content:space-between; font-size:14px; color:var(--text-muted); margin-top:6px;"><span>Tax (calculated at next step)</span><span>—</span></div>
+                  <div style="display:flex; justify-content:space-between; font-size:18px; font-weight:700; margin-top:12px; padding-top:12px; border-top:1px dashed var(--border);"><span>Total today</span><span>€49.00</span></div>
+                </div>
+                <button class="m-btn primary full" style="margin-top:18px;">🔒 Continue to secure payment</button>
+                <div style="font-size:12px;color:var(--text-muted);text-align:center;margin-top:10px;">
+                  Powered by Stripe · Cancel anytime · Final price including tax shown at Stripe Checkout.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="device mobile">
+          <div class="device-bar"><i></i><i></i><i></i><span class="url">/checkout</span></div>
+          <div class="m-app">
+            <div class="m-topbar"><div class="mobile-burger">≡</div><div class="m-logo"><span class="dot">M</span></div></div>
+            <div class="main">
+              <h1 style="font-family:var(--font-display);font-size:20px;color:var(--navy);">Confirm subscription</h1>
+              <div class="m-card" style="margin-top:14px;">
+                <h3 style="color:var(--navy);">Premium</h3>
+                <div style="font-family:var(--font-display); font-size:28px; color:var(--navy);">€49<small style="font-size:13px;color:var(--text-muted);">/mo</small></div>
+                <p style="color:var(--text-muted); font-size:12px; margin-top:6px;">Unlimited chat + compliance</p>
+                <button class="m-btn primary full" style="margin-top:14px;">🔒 Continue to payment</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ SCREEN 14 — MY BILLING ============ -->
+    <div class="screen" id="s14" data-title="Screen 14 — My Billing" data-meta="PB5, PB6, PB7, PB8, PB12 · Subscription status + payment history + refund info" data-issues="PB5|PB6|PB7|PB8|PB12">
+      <div class="stage">
+        <div class="device desktop">
+          <div class="device-bar"><i></i><i></i><i></i><span class="url">mindlex.ai/account/billing</span></div>
+          <div class="m-app">
+            <div class="m-topbar">
+              <div class="m-logo"><span class="dot">M</span> Mindlex</div>
+              <div class="m-nav"><a href="#">Chatbot</a><a href="#">News</a><a href="#">Drive</a></div>
+              <div class="m-topbar-right"><div class="m-avatar">P</div></div>
+            </div>
+            <div class="dashboard">
+              <aside class="side">
+                <div class="side-section">Account</div>
+                <a href="#"><span class="ic">👤</span> Profile</a>
+                <a href="#"><span class="ic">💳</span> Subscription</a>
+                <a href="#" class="active"><span class="ic">💰</span> Billing</a>
+              </aside>
+              <div class="main">
+                <h1>My Billing</h1>
+                <div class="crumb">Subscription status and invoice history</div>
+
+                <div class="bill-grid">
+                  <div class="m-card">
+                    <h3 style="color:var(--navy); margin-bottom:14px;">Subscription status</h3>
+                    <div style="display:grid; gap:10px;">
+                      <div><div class="m-label">Plan</div><div><span class="chip gold">Plus · Monthly</span></div></div>
+                      <div><div class="m-label">Status</div><div><span class="chip success">● Active</span></div></div>
+                      <div><div class="m-label">Next payment due</div><div>15 Jun 2026 — €19.00</div></div>
+                      <div><div class="m-label">Last payment</div><div>15 May 2026 — €19.00</div></div>
+                    </div>
+                    <button class="m-btn danger" style="margin-top:16px;">Cancel subscription</button>
+                  </div>
+                  <div class="m-card">
+                    <h3 style="color:var(--navy); margin-bottom:14px;">Refund info</h3>
+                    <p style="font-size:13.5px; color:var(--text-muted);">
+                      Need a refund? Please contact our support team at
+                      <a href="mailto:info@mindlex.ai" style="color:var(--navy);font-weight:600;">info@mindlex.ai</a>
+                      with your account email and payment details.
+                    </p>
+                  </div>
+                </div>
+
+                <h3 style="color:var(--navy); margin: 24px 0 12px;">Payment history</h3>
+                <div class="m-card flat" style="padding:0; overflow:hidden;">
+                  <table class="m-table">
+                    <thead>
+                      <tr><th>Date</th><th>Plan</th><th>Amount</th><th>Status</th><th>Invoice</th></tr>
+                    </thead>
+                    <tbody>
+                      <tr><td>15 May 2026, 09:14:02</td><td>Plus Monthly</td><td>€19.00</td><td><span class="chip success">Paid</span></td><td><span class="invoice-icon">📥</span></td></tr>
+                      <tr><td>15 Apr 2026, 09:13:51</td><td>Plus Monthly</td><td>€19.00</td><td><span class="chip success">Paid</span></td><td><span class="invoice-icon">📥</span></td></tr>
+                      <tr><td>15 Mar 2026, 09:14:11</td><td>Plus Monthly</td><td>€19.00</td><td><span class="chip success">Paid</span></td><td><span class="invoice-icon">📥</span></td></tr>
+                      <tr><td>15 Feb 2026, 09:13:22</td><td>Plus Monthly</td><td>€19.00</td><td><span class="chip warn" title="Stripe is processing the payment">Pending</span></td><td><span style="opacity:0.3;">📥</span></td></tr>
+                      <tr><td>15 Jan 2026, 09:14:30</td><td>Plus Monthly</td><td>€19.00</td><td><span class="chip success">Paid</span></td><td><span class="invoice-icon">📥</span></td></tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="device mobile">
+          <div class="device-bar"><i></i><i></i><i></i><span class="url">/account/billing</span></div>
+          <div class="m-app">
+            <div class="m-topbar"><div class="mobile-burger">≡</div><div class="m-logo"><span class="dot">M</span></div></div>
+            <div class="main">
+              <h1 style="font-family:var(--font-display);font-size:22px;color:var(--navy);">Billing</h1>
+              <div class="m-card" style="margin-top:14px;">
+                <span class="chip gold">Plus · Monthly</span>
+                <div class="m-label" style="margin-top:10px;">Next payment</div><div>15 Jun · €19</div>
+                <button class="m-btn danger full" style="margin-top:10px;">Cancel</button>
+              </div>
+              <h3 style="color:var(--navy);margin:18px 0 8px;font-size:14px;">Recent payments</h3>
+              <div class="m-card" style="margin-bottom:8px;">
+                <div style="display:flex;justify-content:space-between;font-size:13px;"><span>15 May 2026</span><span class="chip success">Paid</span></div>
+                <div style="font-size:12px;color:var(--text-muted);">Plus · €19.00 · 📥</div>
+              </div>
+              <div class="m-card">
+                <div style="display:flex;justify-content:space-between;font-size:13px;"><span>15 Apr 2026</span><span class="chip success">Paid</span></div>
+                <div style="font-size:12px;color:var(--text-muted);">Plus · €19.00 · 📥</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ SCREEN 15 — ADMIN USERS ============ -->
+    <div class="screen" id="s15" data-title="Screen 15 — Admin: User Management" data-meta="UM10, UM11, UM12, UM17 · Reset password, change role, deactivate, delete, CSV export" data-issues="UM10|UM11|UM12|UM17">
+      <div class="stage">
+        <div class="device desktop">
+          <div class="device-bar"><i></i><i></i><i></i><span class="url">mindlex.ai/admin/users</span></div>
+          <div class="m-app">
+            <div class="m-topbar">
+              <div class="m-logo"><span class="dot">M</span> Mindlex <span class="chip" style="margin-left:6px;background:#0f1e3d;color:var(--gold);">Admin</span></div>
+              <div class="m-nav">
+                <a href="#" class="active">Users</a>
+                <a href="#">Subscriptions</a>
+                <a href="#">Reports</a>
+              </div>
+              <div class="m-topbar-right"><div class="m-avatar">A</div></div>
+            </div>
+            <div class="dashboard">
+              <aside class="side">
+                <div class="side-section">Admin</div>
+                <a href="#" class="active"><span class="ic">👥</span> Users</a>
+                <a href="#"><span class="ic">💳</span> Subscriptions</a>
+                <a href="#"><span class="ic">📊</span> Analytics</a>
+              </aside>
+              <div class="main">
+                <h1>User Management</h1>
+                <div class="crumb">2,418 active users · 142 new this week</div>
+
+                <div class="stat-grid">
+                  <div class="stat-card"><div class="label">Total users</div><div class="value">2,418</div><div class="trend">↑ 142 this week</div></div>
+                  <div class="stat-card"><div class="label">Premium</div><div class="value">312</div><div class="trend">↑ 24</div></div>
+                  <div class="stat-card"><div class="label">Plus</div><div class="value">847</div><div class="trend">↑ 41</div></div>
+                  <div class="stat-card"><div class="label">Deactivated</div><div class="value">38</div><div class="trend" style="color:var(--text-muted);">No change</div></div>
+                </div>
+
+                <div style="display:flex; gap:10px; margin: 18px 0;">
+                  <input class="m-input" placeholder="Search by name or email…" style="max-width:280px;"/>
+                  <select class="m-input" style="max-width:160px;"><option>All roles</option><option>Free</option><option>Plus</option><option>Premium</option></select>
+                  <button class="m-btn outline" style="margin-left:auto;">📥 Download users CSV</button>
+                </div>
+                <div style="font-size:12px; color:var(--text-muted); margin-bottom:10px;">Download the users' information.</div>
+
+                <div class="m-card flat" style="padding:0; overflow:hidden;">
+                  <table class="m-table">
+                    <thead>
+                      <tr><th>Full Name</th><th>Email</th><th>Plan</th><th>Status</th><th>Last payment</th><th>Joined</th><th>Actions</th></tr>
+                    </thead>
+                    <tbody>
+                      <tr><td>Promise Tran</td><td>promise@mindlex.ai</td><td><span class="chip gold">Premium</span></td><td><span class="chip success">Active</span></td><td>15 May 2026</td><td>04 Apr 2026</td><td>⋯</td></tr>
+                      <tr><td>Maria Christou</td><td>maria@psa.app</td><td><span class="chip">Plus</span></td><td><span class="chip success">Active</span></td><td>10 May 2026</td><td>22 Jan 2026</td><td>⋯</td></tr>
+                      <tr><td>Andreas Pavlou</td><td>andreas@law.cy</td><td><span class="chip">Free</span></td><td><span class="chip success">Active</span></td><td>—</td><td>02 May 2026</td><td>⋯</td></tr>
+                      <tr><td>Elena Stavrou</td><td>elena.s@gmail.com</td><td><span class="chip">Plus</span></td><td><span class="chip warn">Deactivated</span></td><td>15 Mar 2026</td><td>10 Dec 2025</td><td>⋯</td></tr>
+                      <tr><td>Nikos Demetriou</td><td>nikos.d@yahoo.gr</td><td><span class="chip gold">Premium</span></td><td><span class="chip success">Active</span></td><td>14 May 2026</td><td>18 Mar 2026</td><td>⋯</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+
+                <div class="modal-demo" style="position:relative;inset:auto;background:transparent;margin-top:24px;display:block;pointer-events:none;">
+                  <div class="modal-box" style="margin:0; max-width: 440px;">
+                    <h4>Change role for Maria Christou</h4>
+                    <div class="m-field"><label class="m-label">New role</label><select class="m-input"><option>Free</option><option selected>Plus</option><option>Premium</option></select></div>
+                    <div class="m-field"><label class="m-label">Reason (mandatory, max 5000)</label><textarea class="m-input" rows="3">User requested upgrade after team expansion to 4 lawyers.</textarea></div>
+                    <div class="actions">
+                      <button class="m-btn outline">Cancel</button>
+                      <button class="m-btn primary">Save change</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="device mobile">
+          <div class="device-bar"><i></i><i></i><i></i><span class="url">/admin/users</span></div>
+          <div class="m-app">
+            <div class="m-topbar"><div class="mobile-burger">≡</div><div class="m-logo"><span class="dot">M</span></div></div>
+            <div class="main">
+              <h1 style="font-family:var(--font-display);font-size:22px;color:var(--navy);">Users</h1>
+              <div class="stat-grid">
+                <div class="stat-card"><div class="label">Users</div><div class="value">2,418</div></div>
+                <div class="stat-card"><div class="label">Premium</div><div class="value">312</div></div>
+              </div>
+              <input class="m-input" placeholder="Search…" style="margin:10px 0;"/>
+              <div class="m-card" style="margin-bottom:8px;"><div style="font-weight:600;">Promise Tran</div><div style="font-size:12px;color:var(--text-muted);">promise@mindlex.ai · Premium · Active</div></div>
+              <div class="m-card" style="margin-bottom:8px;"><div style="font-weight:600;">Maria Christou</div><div style="font-size:12px;color:var(--text-muted);">maria@psa.app · Plus · Active</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ SCREEN 16 — ADMIN SUBSCRIPTIONS ============ -->
+    <div class="screen" id="s16" data-title="Screen 16 — Admin: Subscription Management" data-meta="PB9 · Subscription list + per-user details + cancel" data-issues="PB9">
+      <div class="stage">
+        <div class="device desktop">
+          <div class="device-bar"><i></i><i></i><i></i><span class="url">mindlex.ai/admin/subscriptions</span></div>
+          <div class="m-app">
+            <div class="m-topbar">
+              <div class="m-logo"><span class="dot">M</span> Mindlex <span class="chip" style="margin-left:6px;background:#0f1e3d;color:var(--gold);">Admin</span></div>
+              <div class="m-nav">
+                <a href="#">Users</a>
+                <a href="#" class="active">Subscriptions</a>
+                <a href="#">Reports</a>
+              </div>
+              <div class="m-topbar-right"><div class="m-avatar">A</div></div>
+            </div>
+            <div class="dashboard">
+              <aside class="side">
+                <div class="side-section">Admin</div>
+                <a href="#"><span class="ic">👥</span> Users</a>
+                <a href="#" class="active"><span class="ic">💳</span> Subscriptions</a>
+              </aside>
+              <div class="main">
+                <h1>Subscription Management</h1>
+                <div class="crumb">1,159 paid subscriptions · MRR €23,468</div>
+
+                <div class="stat-grid">
+                  <div class="stat-card"><div class="label">MRR</div><div class="value">€23,468</div><div class="trend">↑ 8.2%</div></div>
+                  <div class="stat-card"><div class="label">Premium</div><div class="value">312</div><div class="trend">↑ 24</div></div>
+                  <div class="stat-card"><div class="label">Plus</div><div class="value">847</div><div class="trend">↑ 41</div></div>
+                  <div class="stat-card"><div class="label">Churn (30d)</div><div class="value">2.4%</div><div class="trend" style="color:var(--danger);">↑ 0.3%</div></div>
+                </div>
+
+                <div class="m-card flat" style="padding:0; overflow:hidden; margin-top: 18px;">
+                  <table class="m-table">
+                    <thead>
+                      <tr><th>User</th><th>Plan</th><th>Cycle</th><th>Status</th><th>Started</th><th>Next charge</th><th>Actions</th></tr>
+                    </thead>
+                    <tbody>
+                      <tr><td><strong>Promise Tran</strong><br/><span style="font-size:11px;color:var(--text-muted);">promise@mindlex.ai</span></td><td><span class="chip gold">Premium</span></td><td>Monthly</td><td><span class="chip success">Active</span></td><td>04 Apr 2026</td><td>04 Jun 2026 — €49</td><td>⋯</td></tr>
+                      <tr><td><strong>Maria Christou</strong><br/><span style="font-size:11px;color:var(--text-muted);">maria@psa.app</span></td><td><span class="chip">Plus</span></td><td>Annual</td><td><span class="chip success">Active</span></td><td>22 Jan 2026</td><td>22 Jan 2027 — €182</td><td>⋯</td></tr>
+                      <tr><td><strong>Nikos Demetriou</strong><br/><span style="font-size:11px;color:var(--text-muted);">nikos.d@yahoo.gr</span></td><td><span class="chip gold">Premium</span></td><td>Monthly</td><td><span class="chip success">Active</span></td><td>18 Mar 2026</td><td>18 Jun 2026 — €49</td><td>⋯</td></tr>
+                      <tr><td><strong>Elena Stavrou</strong><br/><span style="font-size:11px;color:var(--text-muted);">elena.s@gmail.com</span></td><td><span class="chip">Plus</span></td><td>Monthly</td><td><span class="chip warn">Canceled</span></td><td>10 Dec 2025</td><td>Ends 15 Jun 2026</td><td>⋯</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="device mobile">
+          <div class="device-bar"><i></i><i></i><i></i><span class="url">/admin/subscriptions</span></div>
+          <div class="m-app">
+            <div class="m-topbar"><div class="mobile-burger">≡</div><div class="m-logo"><span class="dot">M</span></div></div>
+            <div class="main">
+              <h1 style="font-family:var(--font-display);font-size:22px;color:var(--navy);">Subscriptions</h1>
+              <div class="stat-grid">
+                <div class="stat-card"><div class="label">MRR</div><div class="value">€23k</div></div>
+                <div class="stat-card"><div class="label">Premium</div><div class="value">312</div></div>
+              </div>
+              <div class="m-card" style="margin-top:10px;"><div style="font-weight:600;">Promise Tran</div><div style="font-size:12px;color:var(--text-muted);">Premium Monthly · Active</div></div>
+              <div class="m-card" style="margin-top:8px;"><div style="font-weight:600;">Maria Christou</div><div style="font-size:12px;color:var(--text-muted);">Plus Annual · Active</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ SCREEN 17 — ERROR STATES ============ -->
+    <div class="screen" id="s17" data-title="Screen 17 — Error states" data-meta="Cross-cutting · Common error UIs for FE to reuse" data-issues="UM2|UM5|LC1|CM1|DC1|PB4">
+      <div class="stage">
+        <div class="device desktop">
+          <div class="device-bar"><i></i><i></i><i></i><span class="url">mindlex.ai/* — error states</span></div>
+          <div class="m-app" style="padding: 26px;">
+            <h2 style="font-family:var(--font-display);color:var(--navy);margin-bottom:6px;">Error states gallery</h2>
+            <p style="color:var(--text-muted); font-size:13.5px; margin-bottom:18px;">Reusable error patterns: inline form errors, blocking banners, modals, toasts, and 4xx/5xx fallback screens.</p>
+            <div class="gallery">
+
+              <div class="state-card">
+                <div class="state-card-head"><h3>Login — Invalid credentials</h3><span class="src">UM5</span></div>
+                <div class="state-card-body danger">
+                  <div class="inline-err danger" style="margin: 0 auto 14px; max-width: 360px;">
+                    <span class="ic-emoji">⚠️</span>
+                    <div><strong>Invalid email or password.</strong><br/><span style="font-weight:400;">Check and try again.</span></div>
+                  </div>
+                  <div style="max-width:360px; margin:0 auto;">
+                    <input class="m-input" value="promise@mindlex.ai" style="margin-bottom:8px;"/>
+                    <input class="m-input" type="password" value="••••" style="border-color: var(--danger);"/>
+                    <button class="m-btn primary full" style="margin-top:10px;">Sign in</button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="state-card">
+                <div class="state-card-head"><h3>Registration — Validation</h3><span class="src">UM2</span></div>
+                <div class="state-card-body danger">
+                  <div class="inline-err danger" style="margin-bottom:12px;">
+                    <span class="ic-emoji">⚠️</span>
+                    <div><strong>Please fix the following 3 errors</strong> before continuing.</div>
+                  </div>
+                  <div style="max-width:380px;">
+                    <label class="m-label">Email</label>
+                    <input class="m-input" value="not-an-email" style="border-color: var(--danger);"/>
+                    <div class="m-error">Enter a valid email address.</div>
+                    <label class="m-label" style="margin-top:8px;">Password</label>
+                    <input class="m-input" type="password" value="abc" style="border-color: var(--danger);"/>
+                    <div class="m-error">Must be at least 8 chars with 1 number and 1 symbol.</div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="state-card">
+                <div class="state-card-head"><h3>Login — Email not verified</h3><span class="src">UM3 · UM4</span></div>
+                <div class="state-card-body warn">
+                  <div class="err-illu warn">!</div>
+                  <h4>Verify your email first</h4>
+                  <p>We sent a confirmation link to <strong>promise@mindlex.ai</strong>. Click it to activate your account.</p>
+                  <div class="actions">
+                    <button class="m-btn outline sm">Resend in 0:47</button>
+                    <button class="m-btn ghost sm">Change email</button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="state-card">
+                <div class="state-card-head"><h3>Chat — Quota exceeded</h3><span class="src">LC1</span></div>
+                <div class="state-card-body" style="background:linear-gradient(135deg, #fef3c7, #fde68a);">
+                  <div style="background:#fff; border-left:4px solid var(--gold); border-radius:var(--radius); padding:14px 16px; max-width:420px; margin: 0 auto;">
+                    <strong style="color:var(--navy);">🔒 Daily limit reached (5 / 5)</strong>
+                    <p style="font-size:13px; color:var(--text-muted); margin: 6px 0 10px;">Free users get 5 questions per day. Upgrade to keep asking.</p>
+                    <button class="m-btn gold sm">⚡ Upgrade to Plus</button>
+                    <button class="m-btn ghost sm">Maybe later</button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="state-card">
+                <div class="state-card-head"><h3>Chat — Toxic content blocked</h3><span class="src">LC10</span></div>
+                <div class="state-card-body danger" style="text-align:left;">
+                  <div class="msg assistant toxic" style="max-width:none;">
+                    <div class="msg-bubble">
+                      <strong>⛔ Message blocked</strong><br/>
+                      Per Mindlex Usage Policy, this content is not permitted. Repeated violations may suspend your session.
+                    </div>
+                    <div class="msg-meta" style="color: #991b1b;">Offense 2 of 3 — input remains enabled.</div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="state-card">
+                <div class="state-card-head"><h3>Upload — Unsupported / too large</h3><span class="src">DC1 · CM1</span></div>
+                <div class="state-card-body muted">
+                  <div class="dropzone" style="border-color: var(--danger); background: #fef2f2; margin: 0;">
+                    <div class="ic" style="color:var(--danger);">⊘</div>
+                    <strong style="color:#991b1b;">Unsupported file type</strong>
+                    <div style="font-size:12px; color: var(--text-muted); margin-top:6px;">Only .docx and .doc files up to 25 MB are accepted. <a href="#" style="color:var(--navy);">Try again</a></div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="state-card">
+                <div class="state-card-head"><h3>Checkout — Payment failed</h3><span class="src">PB4</span></div>
+                <div class="state-card-body danger">
+                  <div class="err-illu">✕</div>
+                  <h4>Your payment couldn't be processed</h4>
+                  <p>Your card was declined by the bank. No charge was made. You can try a different card or contact your bank.</p>
+                  <div class="actions">
+                    <button class="m-btn primary sm">Try again</button>
+                    <button class="m-btn outline sm">Use different card</button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="state-card">
+                <div class="state-card-head"><h3>Network / Server error</h3><span class="src">global</span></div>
+                <div class="state-card-body dark">
+                  <div class="err-illu gold">⚡</div>
+                  <h4>Something went wrong on our side</h4>
+                  <p>We couldn't reach the server. Check your connection or try again in a moment.</p>
+                  <div class="actions">
+                    <button class="m-btn gold sm">Retry</button>
+                    <button class="m-btn ghost sm" style="color:#fff;">Reload page</button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="state-card">
+                <div class="state-card-head"><h3>404 — Page not found</h3><span class="src">global</span></div>
+                <div class="state-card-body muted">
+                  <div style="font-family:var(--font-display); font-size:64px; color:var(--gold); text-align:center; line-height:1;">404</div>
+                  <h4 style="margin-top:6px;">Page not found</h4>
+                  <p>The page you were looking for doesn't exist or has moved.</p>
+                  <div class="actions"><button class="m-btn primary sm">← Back home</button></div>
+                </div>
+              </div>
+
+              <div class="state-card">
+                <div class="state-card-head"><h3>Permission denied</h3><span class="src">UM11 · admin</span></div>
+                <div class="state-card-body warn">
+                  <div class="err-illu warn">🔒</div>
+                  <h4>This feature is Admin-only</h4>
+                  <p>Your current role doesn't allow this action. If you think this is a mistake, contact your workspace admin.</p>
+                  <div class="actions"><button class="m-btn outline sm">Back to dashboard</button></div>
+                </div>
+              </div>
+
+              <div class="state-card">
+                <div class="state-card-head"><h3>Last admin protection</h3><span class="src">UM11</span></div>
+                <div class="state-card-body danger">
+                  <div class="inline-err danger" style="max-width:380px; margin:0 auto;">
+                    <span class="ic-emoji">⚠️</span>
+                    <div><strong>Cannot remove the last admin.</strong> Assign another admin first, then retry this action.</div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="state-card">
+                <div class="state-card-head"><h3>Drive — Storage exceeded</h3><span class="src">CM1</span></div>
+                <div class="state-card-body warn">
+                  <div class="err-illu warn">📦</div>
+                  <h4>You've reached 500 MB</h4>
+                  <p>Delete files you no longer need, or upgrade to Premium for 5 GB storage.</p>
+                  <div class="actions">
+                    <button class="m-btn gold sm">Upgrade to Premium</button>
+                    <button class="m-btn outline sm">Manage files</button>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+        <div class="device mobile">
+          <div class="device-bar"><i></i><i></i><i></i><span class="url">/errors</span></div>
+          <div class="m-app" style="padding: 14px;">
+            <h2 style="font-family:var(--font-display);font-size:18px;color:var(--navy);">Error states</h2>
+            <div class="gallery" style="grid-template-columns:1fr;">
+              <div class="state-card">
+                <div class="state-card-head"><h3>Quota exceeded</h3><span class="src">LC1</span></div>
+                <div class="state-card-body warn"><h4>5 / 5 today</h4><p>Upgrade to Plus for unlimited.</p><div class="actions"><button class="m-btn gold sm">Upgrade</button></div></div>
+              </div>
+              <div class="state-card">
+                <div class="state-card-head"><h3>Payment failed</h3><span class="src">PB4</span></div>
+                <div class="state-card-body danger"><div class="err-illu">✕</div><h4>Card declined</h4><div class="actions"><button class="m-btn primary sm">Retry</button></div></div>
+              </div>
+              <div class="state-card">
+                <div class="state-card-head"><h3>404</h3><span class="src">global</span></div>
+                <div class="state-card-body muted"><div style="font-family:var(--font-display); font-size:48px; color:var(--gold); text-align:center;">404</div><p>Page not found</p></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ SCREEN 18 — EMPTY STATES ============ -->
+    <div class="screen" id="s18" data-title="Screen 18 — Empty states" data-meta="Cross-cutting · First-use, no-data, and zero-result screens" data-issues="LC8|LU3|CM1|PB7|UM19">
+      <div class="stage">
+        <div class="device desktop">
+          <div class="device-bar"><i></i><i></i><i></i><span class="url">mindlex.ai/* — empty states</span></div>
+          <div class="m-app" style="padding: 26px;">
+            <h2 style="font-family:var(--font-display);color:var(--navy);margin-bottom:6px;">Empty states gallery</h2>
+            <p style="color:var(--text-muted); font-size:13.5px; margin-bottom:18px;">Friendly zero-data screens that guide the user toward the next action — not blank pages.</p>
+            <div class="gallery">
+
+              <div class="state-card">
+                <div class="state-card-head"><h3>My Drive — No files yet</h3><span class="src">CM1</span></div>
+                <div class="state-card-body muted">
+                  <div class="err-illu gold">📂</div>
+                  <h4>Your Drive is empty</h4>
+                  <p>Upload your first document to start tagging, sharing and running compliance checks.</p>
+                  <div class="actions">
+                    <button class="m-btn primary sm">📥 Upload a document</button>
+                    <button class="m-btn ghost sm">Learn more</button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="state-card">
+                <div class="state-card-head"><h3>Chat history — Empty</h3><span class="src">LC8</span></div>
+                <div class="state-card-body muted">
+                  <div class="err-illu info">💬</div>
+                  <h4>No conversations yet</h4>
+                  <p>Your past chats will appear here. Start a new one to begin building your legal research history.</p>
+                  <div class="actions"><button class="m-btn primary sm">+ New chat</button></div>
+                </div>
+              </div>
+
+              <div class="state-card">
+                <div class="state-card-head"><h3>News — No matching articles</h3><span class="src">LU3</span></div>
+                <div class="state-card-body muted">
+                  <div class="err-illu gold">📰</div>
+                  <h4>Nothing new on your topics today</h4>
+                  <p>We'll notify you with a red dot the moment new articles match your interests. <em>Showing default Cyprus feed in the meantime.</em></p>
+                  <div class="actions">
+                    <button class="m-btn outline sm">⚙️ Edit topics</button>
+                    <button class="m-btn ghost sm">Browse all news</button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="state-card">
+                <div class="state-card-head"><h3>Billing — No payments yet</h3><span class="src">PB7</span></div>
+                <div class="state-card-body muted">
+                  <div class="err-illu muted">💳</div>
+                  <h4>No payment history</h4>
+                  <p>Once you subscribe to a paid plan, all invoices will be available for download here.</p>
+                  <div class="actions"><button class="m-btn gold sm">See plans</button></div>
+                </div>
+              </div>
+
+              <div class="state-card">
+                <div class="state-card-head"><h3>Search — No results</h3><span class="src">CM1 · admin</span></div>
+                <div class="state-card-body muted">
+                  <div class="err-illu muted">🔍</div>
+                  <h4>No matches for "<em>contract</em>"</h4>
+                  <p>Try different keywords, remove filters, or browse all files.</p>
+                  <div class="actions"><button class="m-btn outline sm">Clear filters</button></div>
+                </div>
+              </div>
+
+              <div class="state-card">
+                <div class="state-card-head"><h3>News topics — No selections</h3><span class="src">LU1</span></div>
+                <div class="state-card-body muted">
+                  <div class="err-illu info">🎯</div>
+                  <h4>Pick at least one topic</h4>
+                  <p>Until you set your interests, you'll see the default Cyprus law feed.</p>
+                  <div class="actions"><button class="m-btn primary sm">Choose topics</button></div>
+                </div>
+              </div>
+
+              <div class="state-card">
+                <div class="state-card-head"><h3>Admin — No deactivated users</h3><span class="src">UM12</span></div>
+                <div class="state-card-body muted">
+                  <div class="err-illu muted">✓</div>
+                  <h4>All users are active</h4>
+                  <p>Nothing to review. Deactivated or deleted users will show up here for audit.</p>
+                </div>
+              </div>
+
+              <div class="state-card">
+                <div class="state-card-head"><h3>Chatbot — First-use prompt</h3><span class="src">UM19 · LC1</span></div>
+                <div class="state-card-body" style="background:linear-gradient(135deg, #fffbf2, #fff);">
+                  <div class="err-illu gold">✨</div>
+                  <h4>Ask your first legal question</h4>
+                  <p>Try: <em>"What are my GDPR obligations as a SaaS founder?"</em> — we'll cite sources and explain in plain English.</p>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+        <div class="device mobile">
+          <div class="device-bar"><i></i><i></i><i></i><span class="url">/empty</span></div>
+          <div class="m-app" style="padding: 14px;">
+            <h2 style="font-family:var(--font-display);font-size:18px;color:var(--navy);">Empty states</h2>
+            <div class="gallery" style="grid-template-columns:1fr;">
+              <div class="state-card">
+                <div class="state-card-head"><h3>Empty Drive</h3><span class="src">CM1</span></div>
+                <div class="state-card-body muted"><div class="err-illu gold">📂</div><h4>No files</h4><div class="actions"><button class="m-btn primary sm">Upload</button></div></div>
+              </div>
+              <div class="state-card">
+                <div class="state-card-head"><h3>No chats</h3><span class="src">LC8</span></div>
+                <div class="state-card-body muted"><div class="err-illu info">💬</div><h4>Start chatting</h4><div class="actions"><button class="m-btn primary sm">+ New</button></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ SCREEN 19 — NAVIGATION FLOW ============ -->
+    <div class="screen" id="s19" data-title="Screen 19 — Navigation flow" data-meta="End-to-end screen transitions across guest, app, billing and admin" data-issues="">
+      <div class="stage" style="display:block;">
+        <div class="device desktop">
+          <div class="device-bar"><i></i><i></i><i></i><span class="url">mindlex.ai — navigation map</span></div>
+          <div class="flow-wrap">
+            <h3>Mindlex screen flow</h3>
+            <p style="color:var(--text-muted); font-size:13.5px;">Solid arrows = primary user path. Dashed = conditional / role-gated. Dotted red = error path.</p>
+            <div class="legend">
+              <span><i style="background:#1a2d52;"></i> Public / auth</span>
+              <span><i style="background:#0f766e;"></i> Main app</span>
+              <span><i style="background:#a16207;"></i> Account &amp; billing</span>
+              <span><i style="background:#6b21a8;"></i> Admin</span>
+              <span><i style="background:#c9a96e;"></i> Decision</span>
+            </div>
+
+            <svg viewBox="0 0 1180 900" xmlns="http://www.w3.org/2000/svg" font-family="Inter, system-ui, sans-serif" font-size="12">
+              <defs>
+                <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                  <path d="M 0 0 L 10 5 L 0 10 z" fill="#64748b"/>
+                </marker>
+                <marker id="arrRed" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                  <path d="M 0 0 L 10 5 L 0 10 z" fill="#ef4444"/>
+                </marker>
+                <marker id="arrGold" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                  <path d="M 0 0 L 10 5 L 0 10 z" fill="#c9a96e"/>
+                </marker>
+              </defs>
+
+              <text x="20" y="30" font-size="11" font-weight="700" fill="#1a2d52" letter-spacing="1">PUBLIC / AUTH</text>
+              <line x1="20" y1="36" x2="1160" y2="36" stroke="#e5e7eb"/>
+
+              <g transform="translate(40,55)"><rect width="150" height="56" rx="10" fill="#1a2d52"/><text x="75" y="24" text-anchor="middle" fill="#c9a96e" font-weight="700" font-size="11">01</text><text x="75" y="42" text-anchor="middle" fill="#fff" font-weight="600">Homepage</text></g>
+              <g transform="translate(230,55)"><rect width="150" height="56" rx="10" fill="#1a2d52"/><text x="75" y="24" text-anchor="middle" fill="#c9a96e" font-weight="700" font-size="11">02</text><text x="75" y="42" text-anchor="middle" fill="#fff" font-weight="600">Registration</text></g>
+              <g transform="translate(420,55)"><rect width="150" height="56" rx="10" fill="#1a2d52"/><text x="75" y="24" text-anchor="middle" fill="#c9a96e" font-weight="700" font-size="11">03</text><text x="75" y="42" text-anchor="middle" fill="#fff" font-weight="600">Email Verify</text></g>
+              <g transform="translate(610,55)"><rect width="150" height="56" rx="10" fill="#1a2d52"/><text x="75" y="24" text-anchor="middle" fill="#c9a96e" font-weight="700" font-size="11">04</text><text x="75" y="42" text-anchor="middle" fill="#fff" font-weight="600">Login</text></g>
+              <g transform="translate(800,55)"><rect width="170" height="56" rx="10" fill="#1a2d52"/><text x="85" y="24" text-anchor="middle" fill="#c9a96e" font-weight="700" font-size="11">05</text><text x="85" y="42" text-anchor="middle" fill="#fff" font-weight="600">Reset Password</text></g>
+              <g transform="translate(1000,55)"><polygon points="80,0 160,28 80,56 0,28" fill="#c9a96e"/><text x="80" y="26" text-anchor="middle" fill="#1a2d52" font-weight="700" font-size="10">First login?</text><text x="80" y="38" text-anchor="middle" fill="#1a2d52" font-size="9">(onboarding flag)</text></g>
+
+              <line x1="190" y1="83" x2="230" y2="83" stroke="#64748b" stroke-width="1.6" marker-end="url(#arr)"/>
+              <line x1="380" y1="83" x2="420" y2="83" stroke="#64748b" stroke-width="1.6" marker-end="url(#arr)"/>
+              <line x1="570" y1="83" x2="610" y2="83" stroke="#64748b" stroke-width="1.6" marker-end="url(#arr)"/>
+              <line x1="760" y1="83" x2="800" y2="83" stroke="#64748b" stroke-width="1.6" marker-end="url(#arr)" stroke-dasharray="4 4"/>
+              <text x="780" y="76" font-size="10" fill="#64748b">forgot</text>
+              <line x1="970" y1="83" x2="1000" y2="83" stroke="#64748b" stroke-width="1.6" marker-end="url(#arr)"/>
+
+              <path d="M 885 111 Q 885 140 760 140 Q 685 140 685 111" fill="none" stroke="#64748b" stroke-width="1.4" stroke-dasharray="4 4" marker-end="url(#arr)"/>
+              <text x="770" y="155" font-size="10" fill="#64748b">password reset → sign in</text>
+
+              <path d="M 685 111 Q 660 150 685 140 Q 720 130 685 111" fill="none" stroke="#ef4444" stroke-width="1.4" stroke-dasharray="2 4" marker-end="url(#arrRed)"/>
+              <text x="595" y="166" font-size="10" fill="#ef4444">invalid creds (UM5)</text>
+
+              <text x="20" y="220" font-size="11" font-weight="700" fill="#0f766e" letter-spacing="1">MAIN APP</text>
+              <line x1="20" y1="226" x2="1160" y2="226" stroke="#e5e7eb"/>
+
+              <g transform="translate(40,245)"><rect width="150" height="56" rx="10" fill="#0f766e"/><text x="75" y="24" text-anchor="middle" fill="#fbbf24" font-weight="700" font-size="11">06</text><text x="75" y="42" text-anchor="middle" fill="#fff" font-weight="600">Onboarding</text></g>
+              <g transform="translate(280,235)"><rect width="220" height="76" rx="12" fill="#0f766e" stroke="#c9a96e" stroke-width="2"/><text x="110" y="26" text-anchor="middle" fill="#fbbf24" font-weight="700" font-size="11">07 ★ HUB</text><text x="110" y="46" text-anchor="middle" fill="#fff" font-weight="700" font-size="14">Chatbot</text><text x="110" y="62" text-anchor="middle" fill="#ccfbf1" font-size="10">LC + DC + DA + DD</text></g>
+              <g transform="translate(560,245)"><rect width="140" height="56" rx="10" fill="#0f766e"/><text x="70" y="24" text-anchor="middle" fill="#fbbf24" font-weight="700" font-size="11">08</text><text x="70" y="42" text-anchor="middle" fill="#fff" font-weight="600">News Feed</text></g>
+              <g transform="translate(740,245)"><rect width="150" height="56" rx="10" fill="#0f766e"/><text x="75" y="24" text-anchor="middle" fill="#fbbf24" font-weight="700" font-size="11">09</text><text x="75" y="42" text-anchor="middle" fill="#fff" font-weight="600">News Topics</text></g>
+              <g transform="translate(930,245)"><rect width="150" height="56" rx="10" fill="#0f766e"/><text x="75" y="24" text-anchor="middle" fill="#fbbf24" font-weight="700" font-size="11">10</text><text x="75" y="42" text-anchor="middle" fill="#fff" font-weight="600">My Drive</text></g>
+
+              <path d="M 1080 83 Q 1080 165 115 165 Q 115 245 115 245" fill="none" stroke="#c9a96e" stroke-width="1.6" marker-end="url(#arrGold)"/>
+              <text x="170" y="160" font-size="10" fill="#a16207">YES (first time)</text>
+              <path d="M 1080 83 Q 1080 230 390 230 Q 390 235 390 235" fill="none" stroke="#c9a96e" stroke-width="1.6" marker-end="url(#arrGold)"/>
+              <text x="900" y="205" font-size="10" fill="#a16207">NO (returning)</text>
+
+              <line x1="190" y1="273" x2="280" y2="273" stroke="#64748b" stroke-width="1.6" marker-end="url(#arr)"/>
+              <text x="210" y="265" font-size="10" fill="#64748b">Get started</text>
+              <line x1="500" y1="273" x2="560" y2="273" stroke="#64748b" stroke-width="1.6" marker-end="url(#arr)" marker-start="url(#arr)"/>
+              <line x1="700" y1="273" x2="740" y2="273" stroke="#64748b" stroke-width="1.6" marker-end="url(#arr)" marker-start="url(#arr)"/>
+              <line x1="890" y1="273" x2="930" y2="273" stroke="#64748b" stroke-width="1.6" marker-end="url(#arr)" marker-start="url(#arr)"/>
+
+              <path d="M 390 311 Q 390 350 390 360" fill="none" stroke="#c9a96e" stroke-width="1.4" stroke-dasharray="3 4" marker-end="url(#arrGold)"/>
+              <g transform="translate(310,360)"><rect width="180" height="44" rx="8" fill="#fffbf2" stroke="#c9a96e"/><text x="90" y="20" text-anchor="middle" font-size="11" fill="#a16207" font-weight="700">Inline compliance results</text><text x="90" y="34" text-anchor="middle" font-size="10" fill="#64748b">DC2 → DC3 → DC5 download</text></g>
+
+              <path d="M 1005 301 Q 1005 360 850 360 Q 510 360 500 380" fill="none" stroke="#c9a96e" stroke-width="1.4" stroke-dasharray="3 4" marker-end="url(#arrGold)"/>
+              <text x="850" y="340" font-size="10" fill="#a16207">DD2: save draft to Drive</text>
+
+              <path d="M 390 311 Q 390 460 760 460" fill="none" stroke="#ef4444" stroke-width="1.4" stroke-dasharray="2 4" marker-end="url(#arrRed)"/>
+              <text x="430" y="478" font-size="10" fill="#ef4444">LC1: 429 quota → Upgrade</text>
+
+              <text x="20" y="500" font-size="11" font-weight="700" fill="#a16207" letter-spacing="1">ACCOUNT &amp; BILLING</text>
+              <line x1="20" y1="506" x2="1160" y2="506" stroke="#e5e7eb"/>
+
+              <g transform="translate(40,525)"><rect width="170" height="56" rx="10" fill="#a16207"/><text x="85" y="24" text-anchor="middle" fill="#fef3c7" font-weight="700" font-size="11">11</text><text x="85" y="42" text-anchor="middle" fill="#fff" font-weight="600">My Account</text></g>
+              <g transform="translate(250,525)"><rect width="170" height="56" rx="10" fill="#a16207"/><text x="85" y="24" text-anchor="middle" fill="#fef3c7" font-weight="700" font-size="11">12</text><text x="85" y="42" text-anchor="middle" fill="#fff" font-weight="600">Subscription Plans</text></g>
+              <g transform="translate(460,525)"><rect width="170" height="56" rx="10" fill="#a16207"/><text x="85" y="24" text-anchor="middle" fill="#fef3c7" font-weight="700" font-size="11">13</text><text x="85" y="42" text-anchor="middle" fill="#fff" font-weight="600">Checkout</text></g>
+              <g transform="translate(670,525)"><rect width="170" height="56" rx="10" fill="#fff" stroke="#a16207" stroke-width="2" stroke-dasharray="5 4"/><text x="85" y="24" text-anchor="middle" fill="#a16207" font-weight="700" font-size="10">EXTERNAL</text><text x="85" y="42" text-anchor="middle" fill="#a16207" font-weight="600">Stripe Checkout</text></g>
+              <g transform="translate(880,510)"><rect width="140" height="36" rx="8" fill="#10b981"/><text x="70" y="23" text-anchor="middle" fill="#fff" font-weight="600" font-size="12">✓ Success</text></g>
+              <g transform="translate(880,558)"><rect width="140" height="36" rx="8" fill="#ef4444"/><text x="70" y="23" text-anchor="middle" fill="#fff" font-weight="600" font-size="12">✕ Cancel</text></g>
+              <g transform="translate(1040,525)"><rect width="120" height="56" rx="10" fill="#a16207"/><text x="60" y="24" text-anchor="middle" fill="#fef3c7" font-weight="700" font-size="11">14</text><text x="60" y="42" text-anchor="middle" fill="#fff" font-weight="600">My Billing</text></g>
+
+              <path d="M 390 311 Q 390 420 125 420 Q 125 525 125 525" fill="none" stroke="#64748b" stroke-width="1.6" marker-end="url(#arr)"/>
+              <text x="135" y="500" font-size="10" fill="#64748b">Account menu</text>
+              <line x1="210" y1="553" x2="250" y2="553" stroke="#64748b" stroke-width="1.6" marker-end="url(#arr)"/>
+              <line x1="420" y1="553" x2="460" y2="553" stroke="#64748b" stroke-width="1.6" marker-end="url(#arr)"/>
+              <text x="425" y="546" font-size="10" fill="#64748b">Upgrade</text>
+              <line x1="630" y1="553" x2="670" y2="553" stroke="#64748b" stroke-width="1.6" marker-end="url(#arr)"/>
+              <text x="638" y="546" font-size="10" fill="#64748b">PB4</text>
+              <line x1="840" y1="540" x2="880" y2="528" stroke="#64748b" stroke-width="1.6" marker-end="url(#arr)"/>
+              <line x1="840" y1="566" x2="880" y2="576" stroke="#ef4444" stroke-width="1.6" stroke-dasharray="3 4" marker-end="url(#arrRed)"/>
+              <line x1="1020" y1="528" x2="1040" y2="540" stroke="#10b981" stroke-width="1.6" marker-end="url(#arr)"/>
+              <path d="M 880 576 Q 700 640 335 640 Q 335 581 335 581" fill="none" stroke="#ef4444" stroke-width="1.4" stroke-dasharray="3 4" marker-end="url(#arrRed)"/>
+              <text x="540" y="660" font-size="10" fill="#ef4444">Cancel → back to Plans</text>
+              <path d="M 1100 525 Q 1100 410 390 311" fill="none" stroke="#64748b" stroke-width="1.4" stroke-dasharray="4 4" marker-end="url(#arr)"/>
+              <text x="1015" y="420" font-size="10" fill="#64748b">Back to chat</text>
+
+              <text x="20" y="730" font-size="11" font-weight="700" fill="#6b21a8" letter-spacing="1">ADMIN</text>
+              <line x1="20" y1="736" x2="1160" y2="736" stroke="#e5e7eb"/>
+
+              <g transform="translate(40,755)"><rect width="170" height="56" rx="10" fill="#6b21a8"/><text x="85" y="24" text-anchor="middle" fill="#fde68a" font-weight="700" font-size="11">15</text><text x="85" y="42" text-anchor="middle" fill="#fff" font-weight="600">Admin: Users</text></g>
+              <g transform="translate(250,755)"><rect width="190" height="56" rx="10" fill="#6b21a8"/><text x="95" y="24" text-anchor="middle" fill="#fde68a" font-weight="700" font-size="11">16</text><text x="95" y="42" text-anchor="middle" fill="#fff" font-weight="600">Admin: Subscriptions</text></g>
+
+              <path d="M 685 111 Q 685 700 125 755" fill="none" stroke="#6b21a8" stroke-width="1.4" stroke-dasharray="4 4" marker-end="url(#arr)"/>
+              <text x="430" y="700" font-size="10" fill="#6b21a8">If role=Admin (post-login)</text>
+              <line x1="210" y1="783" x2="250" y2="783" stroke="#64748b" stroke-width="1.6" marker-end="url(#arr)" marker-start="url(#arr)"/>
+
+              <g transform="translate(470,750)"><rect width="200" height="66" rx="8" fill="#faf5ff" stroke="#6b21a8" stroke-dasharray="3 3"/><text x="100" y="22" text-anchor="middle" font-size="10" fill="#6b21a8" font-weight="700">Action popups (modal)</text><text x="100" y="38" text-anchor="middle" font-size="10" fill="#64748b">UM10 reset pwd · UM11 change role</text><text x="100" y="52" text-anchor="middle" font-size="10" fill="#64748b">UM12 deactivate/delete · PB9 cancel</text></g>
+              <line x1="440" y1="783" x2="470" y2="783" stroke="#64748b" stroke-width="1.4" stroke-dasharray="3 3" marker-end="url(#arr)"/>
+
+              <text x="20" y="870" font-size="10.5" fill="#64748b" font-style="italic">Logout from any screen → returns to Homepage (UM9).</text>
+              <text x="20" y="886" font-size="10.5" fill="#64748b" font-style="italic">Premium / Plus / Free gating shown contextually via Upgrade banners (LC1, CM1, LU1) — not separate screens.</text>
+            </svg>
+          </div>
+        </div>
+
+        <div class="device mobile">
+          <div class="device-bar"><i></i><i></i><i></i><span class="url">/flow</span></div>
+          <div class="flow-wrap" style="border-radius:0;">
+            <h3 style="font-size:16px;">Mindlex flow (compact)</h3>
+            <p style="font-size:11.5px; color:var(--text-muted);">Best viewed on desktop — scroll horizontally.</p>
+            <svg viewBox="0 0 360 720" xmlns="http://www.w3.org/2000/svg" font-family="Inter, system-ui, sans-serif" font-size="11" style="min-width:0;">
+              <defs><marker id="arrM" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#64748b"/></marker></defs>
+              <g transform="translate(100,20)"><rect width="160" height="46" rx="8" fill="#1a2d52"/><text x="80" y="28" text-anchor="middle" fill="#fff" font-weight="600">01 Homepage</text></g>
+              <line x1="180" y1="66" x2="180" y2="92" stroke="#64748b" stroke-width="1.4" marker-end="url(#arrM)"/>
+              <g transform="translate(100,92)"><rect width="160" height="46" rx="8" fill="#1a2d52"/><text x="80" y="28" text-anchor="middle" fill="#fff" font-weight="600">04 Login</text></g>
+              <line x1="180" y1="138" x2="180" y2="164" stroke="#64748b" stroke-width="1.4" marker-end="url(#arrM)"/>
+              <g transform="translate(100,164)"><rect width="160" height="46" rx="8" fill="#0f766e" stroke="#c9a96e" stroke-width="2"/><text x="80" y="28" text-anchor="middle" fill="#fff" font-weight="700">07 Chatbot ★</text></g>
+              <line x1="180" y1="210" x2="180" y2="240" stroke="#64748b" stroke-width="1.4"/>
+              <line x1="80" y1="240" x2="280" y2="240" stroke="#64748b" stroke-width="1.4"/>
+              <line x1="80" y1="240" x2="80" y2="270" stroke="#64748b" stroke-width="1.4" marker-end="url(#arrM)"/>
+              <line x1="180" y1="240" x2="180" y2="270" stroke="#64748b" stroke-width="1.4" marker-end="url(#arrM)"/>
+              <line x1="280" y1="240" x2="280" y2="270" stroke="#64748b" stroke-width="1.4" marker-end="url(#arrM)"/>
+              <g transform="translate(20,270)"><rect width="120" height="40" rx="8" fill="#0f766e"/><text x="60" y="25" text-anchor="middle" fill="#fff" font-size="10">08 News</text></g>
+              <g transform="translate(150,270)"><rect width="60" height="40" rx="8" fill="#0f766e"/><text x="30" y="25" text-anchor="middle" fill="#fff" font-size="10">10 Drive</text></g>
+              <g transform="translate(220,270)"><rect width="120" height="40" rx="8" fill="#a16207"/><text x="60" y="25" text-anchor="middle" fill="#fff" font-size="10">11 Account</text></g>
+              <line x1="280" y1="310" x2="280" y2="340" stroke="#64748b" stroke-width="1.4" marker-end="url(#arrM)"/>
+              <g transform="translate(220,340)"><rect width="120" height="40" rx="8" fill="#a16207"/><text x="60" y="25" text-anchor="middle" fill="#fff" font-size="10">12 Plans</text></g>
+              <line x1="280" y1="380" x2="280" y2="410" stroke="#64748b" stroke-width="1.4" marker-end="url(#arrM)"/>
+              <g transform="translate(220,410)"><rect width="120" height="40" rx="8" fill="#a16207"/><text x="60" y="25" text-anchor="middle" fill="#fff" font-size="10">13 Checkout</text></g>
+              <line x1="280" y1="450" x2="280" y2="480" stroke="#64748b" stroke-width="1.4" marker-end="url(#arrM)"/>
+              <g transform="translate(220,480)"><rect width="120" height="40" rx="8" fill="#10b981"/><text x="60" y="25" text-anchor="middle" fill="#fff" font-size="10">✓ Success → 14 Billing</text></g>
+              <g transform="translate(20,560)"><rect width="160" height="40" rx="8" fill="#6b21a8"/><text x="80" y="25" text-anchor="middle" fill="#fff" font-size="10">15 Admin Users</text></g>
+              <g transform="translate(20,610)"><rect width="160" height="40" rx="8" fill="#6b21a8"/><text x="80" y="25" text-anchor="middle" fill="#fff" font-size="10">16 Admin Subscriptions</text></g>
+              <text x="20" y="680" font-size="10" fill="#64748b" font-style="italic">Admin row appears only if role=Admin.</text>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+  const navItems = document.querySelectorAll('.viewer-nav-item');
+  const screens  = document.querySelectorAll('.screen');
+  const title    = document.getElementById('screen-title');
+  const meta     = document.getElementById('screen-meta');
+  const pillsBox = document.getElementById('issue-pills');
+
+  function activate(id) {
+    navItems.forEach(n => n.classList.toggle('active', n.dataset.screen === id));
+    screens.forEach(s => s.classList.toggle('active', s.id === id));
+    const el = document.getElementById(id);
+    if (!el) return;
+    title.textContent = el.dataset.title;
+    meta.innerHTML = el.dataset.meta + ' · <a href="https://linear.app/psa-app/project/mindlex-6eeabbbacaa3/issues" target="_blank">view Linear issues ↗</a>';
+    pillsBox.innerHTML = '';
+    (el.dataset.issues || '').split('|').filter(Boolean).forEach(code => {
+      const grp = code.match(/^([A-Z]+)/)[1];
+      const p = document.createElement('span');
+      p.className = 'pill ' + grp;
+      p.textContent = code;
+      pillsBox.appendChild(p);
+    });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+  navItems.forEach(n => n.addEventListener('click', () => activate(n.dataset.screen)));
+
+  const toggles = document.querySelectorAll('.viewer-toggles button');
+  toggles.forEach(b => b.addEventListener('click', () => {
+    toggles.forEach(x => x.classList.remove('active'));
+    b.classList.add('active');
+    document.body.classList.remove('show-mobile', 'show-both');
+    if (b.dataset.mode === 'mobile') document.body.classList.add('show-mobile');
+    if (b.dataset.mode === 'both') document.body.classList.add('show-both');
+  }));
+
+  activate('s1');
+
+  document.querySelectorAll('.faq-item').forEach(f => {
+    f.addEventListener('click', () => f.classList.toggle('open'));
+  });
+</script>
+</body>
+</html>
