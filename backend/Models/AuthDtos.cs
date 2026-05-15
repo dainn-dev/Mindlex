@@ -11,6 +11,7 @@ public class RegisterRequest
 
     [Required(ErrorMessage = "Email is required.")]
     [EmailAddress(ErrorMessage = "Please enter a valid email address.")]
+    [StringLength(254, ErrorMessage = "Email is too long.")]
     public string Email { get; set; } = string.Empty;
 
     [Required(ErrorMessage = "Password is required.")]
@@ -36,26 +37,35 @@ public class LoginRequest
 {
     [Required(ErrorMessage = "Email is required.")]
     [EmailAddress(ErrorMessage = "Please enter a valid email address.")]
+    [StringLength(254)]
     public string Email { get; set; } = string.Empty;
 
     [Required(ErrorMessage = "Password is required.")]
+    [StringLength(256, MinimumLength = 1)]
     public string Password { get; set; } = string.Empty;
 
     public bool RememberMe { get; set; }
 }
 
-public record RefreshTokenRequest(string RefreshToken);
+public class RefreshTokenRequest
+{
+    [Required(ErrorMessage = "Refresh token is required.")]
+    [StringLength(2048, MinimumLength = 16, ErrorMessage = "Refresh token has invalid length.")]
+    public string RefreshToken { get; set; } = string.Empty;
+}
 
 public class ForgotPasswordRequest
 {
     [Required(ErrorMessage = "Email is required.")]
     [EmailAddress(ErrorMessage = "Please enter a valid email address.")]
+    [StringLength(254)]
     public string Email { get; set; } = string.Empty;
 }
 
 public class ResetPasswordRequest
 {
     [Required(ErrorMessage = "Reset token is required.")]
+    [StringLength(1024, MinimumLength = 16)]
     public string Token { get; set; } = string.Empty;
 
     [Required(ErrorMessage = "Password is required.")]
@@ -67,4 +77,12 @@ public class ResetPasswordRequest
     public string ConfirmPassword { get; set; } = string.Empty;
 }
 
-public record VerifyEmailRequest(Guid UserId, string Token);
+public class VerifyEmailRequest
+{
+    [Required(ErrorMessage = "User id is required.")]
+    public Guid UserId { get; set; }
+
+    [Required(ErrorMessage = "Token is required.")]
+    [StringLength(1024, MinimumLength = 16)]
+    public string Token { get; set; } = string.Empty;
+}

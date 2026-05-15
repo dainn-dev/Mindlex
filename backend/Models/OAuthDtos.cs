@@ -6,9 +6,12 @@ namespace Mindlex.Models;
 public class SocialSignInRequest
 {
     [Required(ErrorMessage = "Authorization code is required.")]
+    [StringLength(4096, MinimumLength = 1)]
     public string Code { get; set; } = string.Empty;
 
     [Required(ErrorMessage = "Callback URL is required.")]
+    [Url(ErrorMessage = "Callback URL must be a valid absolute URL.")]
+    [StringLength(2048)]
     public string CallbackUrl { get; set; } = string.Empty;
 }
 

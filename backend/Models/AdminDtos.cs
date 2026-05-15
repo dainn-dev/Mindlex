@@ -11,6 +11,6 @@ public class ChangeUserRoleRequest
     public string Role { get; set; } = string.Empty;
 
     [Required(ErrorMessage = "Reason is required.")]
-    [StringLength(5000, ErrorMessage = "Reason must be at most 5000 characters.")]
+    [StringLength(5000, MinimumLength = 1, ErrorMessage = "Reason must be 1\u20135000 characters.")]
     public string Reason { get; set; } = string.Empty;
 }

@@ -114,6 +114,7 @@ Services/
   EchrFetcher.cs
   INewsSourceFetcher.cs
   NewsIngestionService.cs
+  RssFetcherBase.cs
  RoleSeeder.cs
  Sr2DataRetentionService.cs
 Validation/

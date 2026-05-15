@@ -294,6 +294,9 @@ public class DocumentsController : ControllerBase
     }
 
     [HttpPost("documents/upload")]
+    // 5 files * 25 MB + multipart overhead ≈ 150 MB hard ceiling at Kestrel level.
+    [RequestSizeLimit(150L * 1024 * 1024)]
+    [RequestFormLimits(MultipartBodyLengthLimit = 150L * 1024 * 1024)]
     public async Task<IActionResult> UploadDocuments(List<IFormFile> files, CancellationToken ct)
     {
         var userId = CurrentUserId;

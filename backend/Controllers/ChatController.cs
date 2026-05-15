@@ -408,6 +408,9 @@ public class ChatController : ControllerBase
     }
 
     [HttpPost("threads/{threadId:guid}/uploads")]
+    // Single chat upload capped at ~30MB to cover 25MB file + multipart overhead.
+    [RequestSizeLimit(30L * 1024 * 1024)]
+    [RequestFormLimits(MultipartBodyLengthLimit = 30L * 1024 * 1024)]
     public async Task<IActionResult> UploadChatDocument(Guid threadId, IFormFile? file, CancellationToken ct)
     {
         var userId = CurrentUserId;
