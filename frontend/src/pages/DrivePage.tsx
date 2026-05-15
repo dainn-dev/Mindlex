@@ -57,7 +57,7 @@ export function DrivePage() {
       const { data } = await api.post("/documents/upload", fd, {
         headers: { "Content-Type": "multipart/form-data" }
       });
-      data?.uploaded?.forEach((u: { name: string; anonymization?: { notice?: string } }) => {
+      data?.uploaded?.forEach((u: { fileName: string; anonymization?: { notice?: string } }) => {
         if (u.anonymization?.notice) showToast("info", u.anonymization.notice);
       });
       showToast("success", `${selected.length} file(s) uploaded.`);
@@ -70,9 +70,9 @@ export function DrivePage() {
   };
 
   const visibleFiles = files.filter(
-    (f) => !search || f.name.toLowerCase().includes(search.toLowerCase())
+    (f) => !search || f.fileName.toLowerCase().includes(search.toLowerCase())
   );
-  const used = files.reduce((sum, f) => sum + f.size, 0);
+  const used = files.reduce((sum, f) => sum + f.sizeBytes, 0);
   const usedPct = Math.round((used / QUOTA) * 100);
 
   return (
@@ -186,19 +186,16 @@ export function DrivePage() {
                   <tr key={f.id} className="border-t border-slate-100 hover:bg-slate-50">
                     <td className="p-3">
                       <span className="inline-flex items-center gap-2 font-semibold">
-                        <FileText size={14} className="text-slate-400" /> {f.name}
+                        <FileText size={14} className="text-slate-400" /> {f.fileName}
                       </span>
-                      {f.anonymization?.piiRemoved && (
-                        <div className="text-[11px] text-emerald-600">\u2713 PII anonymized</div>
-                      )}
                     </td>
                     <td className="p-3">
                       <div className="flex gap-1 flex-wrap">
                         {f.tags.map((t) => <span key={t} className="chip">{t}</span>)}
                       </div>
                     </td>
-                    <td className="p-3">{formatBytes(f.size)}</td>
-                    <td className="p-3">{formatDate(f.modifiedAt)}</td>
+                    <td className="p-3">{f.sizeDisplay ?? formatBytes(f.sizeBytes)}</td>
+                    <td className="p-3">{formatDate(f.lastModifiedAt)}</td>
                     <td className="p-3">
                       <span className={f.source === "shared" ? "chip-warn" : "chip-success"}>
                         {f.source}
@@ -225,7 +222,7 @@ export function DrivePage() {
         <TagsModal file={tagsFor} onClose={() => setTagsFor(null)} onDone={reload} />
         <ConfirmModal
           open={!!deleteFor}
-          title={`Delete ${deleteFor?.name}?`}
+          title={`Delete ${deleteFor?.fileName}?`}
           message="This action cannot be undone."
           destructive
           confirmText="Delete"
@@ -282,14 +279,14 @@ function RowMenu({
       const r = await api.get(`/documents/${file.id}/download`, { responseType: "blob" });
       const url = URL.createObjectURL(r.data);
       const a = document.createElement("a");
-      a.href = url; a.download = file.name; a.click();
+      a.href = url; a.download = file.fileName; a.click();
       URL.revokeObjectURL(url);
     } catch { /* noop */ }
   };
-  const isOwn = file.source === "own";
+  const isOwn = file.source === "own" || file.source === "uploaded";
   return (
     <Dropdown
-      menuLabel={`Actions for ${file.name}`}
+      menuLabel={`Actions for ${file.fileName}`}
       trigger={({ toggle, open, ref }) => (
         <button
           ref={ref}
@@ -297,7 +294,7 @@ function RowMenu({
           onClick={toggle}
           aria-haspopup="menu"
           aria-expanded={open}
-          aria-label={`Actions for ${file.name}`}
+          aria-label={`Actions for ${file.fileName}`}
           className="text-slate-400 hover:text-navy rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-gold"
         >
           <MoreHorizontal size={16} />
@@ -337,7 +334,7 @@ function ShareModal({
     } finally { setBusy(false); }
   };
   return (
-    <Modal open onClose={onClose} title={`Share ${file.name}`}>
+    <Modal open onClose={onClose} title={`Share ${file.fileName}`}>
       <Input
         label="Recipient emails (semicolon-separated, max 5)"
         value={text}
@@ -355,15 +352,16 @@ function ShareModal({
 function RenameModal({
   file, onClose, onDone
 }: { file: DocFile | null; onClose: () => void; onDone: () => void }) {
-  const [name, setName] = useState(file?.name ?? "");
+  const [name, setName] = useState(file?.fileName ?? "");
   const [busy, setBusy] = useState(false);
-  useEffect(() => { setName(file?.name ?? ""); }, [file]);
+  useEffect(() => { setName(file?.fileName ?? ""); }, [file]);
   const showToast = useUiStore((s) => s.showToast);
   if (!file) return null;
   const save = async () => {
     setBusy(true);
     try {
-      await api.patch(`/documents/${file.id}`, { name });
+      // BE expects { newName }
+      await api.patch(`/documents/${file.id}`, { newName: name });
       showToast("success", "Renamed");
       onDone(); onClose();
     } catch { showToast("danger", "Rename failed"); }
@@ -404,7 +402,7 @@ function TagsModal({
     finally { setBusy(false); }
   };
   return (
-    <Modal open onClose={onClose} title={`Tags for ${file.name}`}>
+    <Modal open onClose={onClose} title={`Tags for ${file.fileName}`}>
       <div className="flex gap-2 flex-wrap mb-4">
         {ALL_TAGS.map((t) => (
           <button

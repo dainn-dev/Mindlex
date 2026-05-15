@@ -13,18 +13,22 @@ export function AppLayout() {
   const logout = useAuthStore((s) => s.logout);
   const navigate = useNavigate();
   const [hasUnreadNews, setHasUnreadNews] = useState(false);
+  const [hasUnseenShares, setHasUnseenShares] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
     api.get("/news/unread-count")
       .then((r) => setHasUnreadNews(!!r.data?.hasUnread))
       .catch(() => undefined);
+    api.get("/documents/share-status")
+      .then((r) => setHasUnseenShares(!!r.data?.hasUnseen))
+      .catch(() => undefined);
   }, []);
 
   const navItems = [
     { to: "/chatbot", label: t("nav.chatbot") },
     { to: "/news", label: t("nav.news"), badge: hasUnreadNews },
-    { to: "/drive", label: t("nav.drive") },
+    { to: "/drive", label: t("nav.drive"), badge: hasUnseenShares },
     { to: "/account/subscription", label: t("nav.plans") }
   ];
   if (user?.roles.includes("Admin")) {

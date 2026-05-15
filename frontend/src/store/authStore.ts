@@ -3,11 +3,18 @@ import type { User } from "@/types";
 import { api } from "@/lib/api";
 import { setTokens, clearTokens, isAuthenticated } from "@/lib/auth";
 
+export interface SocialLoginResult {
+  user: User;
+  profileCompletionRequired: boolean;
+  provider: string;
+}
+
 interface AuthState {
   user: User | null;
   initialized: boolean;
   login: (email: string, password: string, remember: boolean) => Promise<User>;
-  socialLogin: (provider: "google" | "microsoft", code: string) => Promise<User>;
+  socialLogin: (provider: "google" | "microsoft", code: string) => Promise<SocialLoginResult>;
+  completeSocialProfile: (dateOfBirth: string) => Promise<void>;
   register: (data: RegisterData) => Promise<void>;
   logout: () => Promise<void>;
   refreshUser: () => Promise<void>;
@@ -38,7 +45,16 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     const { data } = await api.post(`/auth/oauth/${provider}`, { code });
     setTokens(data.accessToken, data.refreshToken, true);
     set({ user: data.user, initialized: true });
-    return data.user;
+    return {
+      user: data.user as User,
+      profileCompletionRequired: !!data.profileCompletionRequired,
+      provider: data.provider ?? provider
+    };
+  },
+
+  completeSocialProfile: async (dateOfBirth: string) => {
+    await api.post("/auth/oauth/complete-profile", { dateOfBirth });
+    await get().refreshUser();
   },
 
   register: async (data) => {

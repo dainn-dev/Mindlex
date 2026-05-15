@@ -2,7 +2,6 @@
 import { useEffect, useState } from "react";
 import { api, apiError } from "@/lib/api";
 import { Button } from "@/components/ui/Button";
-import { Input } from "@/components/ui/Input";
 import { Modal } from "@/components/ui/Modal";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import { Dropdown } from "@/components/ui/Dropdown";
@@ -28,6 +27,31 @@ interface AdminUsersResponse {
   totalCount: number;
 }
 
+interface UserSubscriptionDetail {
+  userId: string;
+  fullName: string | null;
+  email: string;
+  currentRole: string;
+  subscriptionStatus: "Active" | "Canceled" | "Expired";
+  startDate?: string;
+  endDate?: string;
+  lastPaymentDate?: string;
+  nextPaymentDue?: string;
+  paymentStatus?: string;
+  canCancel: boolean;
+  paymentHistory: {
+    id: string;
+    paidAt: string;
+    paidAtDisplay: string;
+    subscriptionPlan: string | null;
+    amount: number;
+    amountDisplay: string;
+    currency: string;
+    status: string;
+    invoiceDownloadUrl: string | null;
+  }[];
+}
+
 export function AdminUsersPage() {
   const me = useAuthStore((s) => s.user);
   const [users, setUsers] = useState<AdminUser[]>([]);
@@ -37,13 +61,13 @@ export function AdminUsersPage() {
   const [confirmReset, setConfirmReset] = useState<AdminUser | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<AdminUser | null>(null);
   const [confirmDeact, setConfirmDeact] = useState<AdminUser | null>(null);
+  const [subFor, setSubFor] = useState<AdminUser | null>(null);
   const showToast = useUiStore((s) => s.showToast);
 
   const load = () => {
     api.get<AdminUsersResponse | AdminUser[]>("/admin/users")
       .then((r) => {
         const data = r.data;
-        // Backend currently returns { users, totalCount }; tolerate either shape
         if (Array.isArray(data)) setUsers(data);
         else if (data && Array.isArray(data.users)) setUsers(data.users);
       })
@@ -177,6 +201,7 @@ export function AdminUsersPage() {
                       onRole={() => setRoleFor(u)}
                       onToggle={() => u.status === "active" ? setConfirmDeact(u) : setStatus(u, "active")}
                       onDelete={() => setConfirmDelete(u)}
+                      onViewSub={() => setSubFor(u)}
                     />
                   </td>
                 </tr>
@@ -187,6 +212,7 @@ export function AdminUsersPage() {
       </div>
 
       <RoleEditModal user={roleFor} onClose={() => setRoleFor(null)} onSaved={load} />
+      <UserSubscriptionModal user={subFor} onClose={() => setSubFor(null)} />
 
       <ConfirmModal
         open={!!confirmReset}
@@ -226,7 +252,7 @@ function Stat({ label, value }: { label: string; value: number | string }) {
 }
 
 function RowActions({
-  user, isSelf, onResetPwd, onRole, onToggle, onDelete
+  user, isSelf, onResetPwd, onRole, onToggle, onDelete, onViewSub
 }: {
   user: AdminUser;
   isSelf: boolean;
@@ -234,6 +260,7 @@ function RowActions({
   onRole: () => void;
   onToggle: () => void;
   onDelete: () => void;
+  onViewSub: () => void;
 }) {
   if (isSelf) {
     return (
@@ -264,12 +291,95 @@ function RowActions({
         </button>
       )}
       items={[
+        { key: "view-sub", label: "View subscription", onSelect: onViewSub },
         { key: "reset", label: "Reset password", onSelect: onResetPwd, hidden: user.role === "Admin" },
         { key: "role", label: "Edit role", onSelect: onRole },
         { key: "toggle", label: user.status === "active" ? "Deactivate" : "Activate", onSelect: onToggle },
         { key: "delete", label: "Delete", onSelect: onDelete, danger: true }
       ]}
     />
+  );
+}
+
+function UserSubscriptionModal({
+  user, onClose
+}: { user: AdminUser | null; onClose: () => void }) {
+  const [detail, setDetail] = useState<UserSubscriptionDetail | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (!user) { setDetail(null); return; }
+    setLoading(true);
+    api.get<UserSubscriptionDetail>(`/admin/users/${user.id}/subscription`)
+      .then((r) => setDetail(r.data))
+      .catch(() => setDetail(null))
+      .finally(() => setLoading(false));
+  }, [user]);
+
+  if (!user) return null;
+
+  return (
+    <Modal open onClose={onClose} title={`${user.fullName} \u2014 subscription`} size="lg">
+      {loading && <p className="text-slate-400 text-sm">Loading\u2026</p>}
+      {!loading && detail && (
+        <div className="space-y-3 text-sm">
+          <Row label="Role">{detail.currentRole}</Row>
+          <Row label="Status">
+            <span className={
+              detail.subscriptionStatus === "Active" ? "chip-success"
+              : detail.subscriptionStatus === "Canceled" ? "chip-warn"
+              : "chip-danger"
+            }>{detail.subscriptionStatus}</span>
+          </Row>
+          {detail.startDate && <Row label="Started">{formatDate(detail.startDate)}</Row>}
+          {detail.endDate && <Row label="Ends">{formatDate(detail.endDate)}</Row>}
+          {detail.nextPaymentDue && <Row label="Next payment">{formatDate(detail.nextPaymentDue)}</Row>}
+          {detail.lastPaymentDate && <Row label="Last payment">{formatDate(detail.lastPaymentDate)}</Row>}
+          {detail.paymentStatus && <Row label="Payment status">{detail.paymentStatus}</Row>}
+
+          {detail.paymentHistory.length > 0 && (
+            <div className="mt-4">
+              <div className="label mb-2">Payment history</div>
+              <div className="border border-slate-200 rounded-md max-h-64 overflow-y-auto">
+                <table className="w-full text-xs">
+                  <thead className="bg-slate-50 text-slate-500">
+                    <tr>
+                      <th className="text-left p-2">Date</th>
+                      <th className="text-left p-2">Plan</th>
+                      <th className="text-left p-2">Amount</th>
+                      <th className="text-left p-2">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {detail.paymentHistory.map((p) => (
+                      <tr key={p.id} className="border-t border-slate-100">
+                        <td className="p-2">{p.paidAtDisplay}</td>
+                        <td className="p-2">{p.subscriptionPlan ?? "\u2014"}</td>
+                        <td className="p-2">{p.amountDisplay}</td>
+                        <td className="p-2">{p.status}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+      {!loading && !detail && <p className="text-slate-400 text-sm">No subscription data.</p>}
+      <div className="flex justify-end mt-4">
+        <Button variant="outline" onClick={onClose}>Close</Button>
+      </div>
+    </Modal>
+  );
+}
+
+function Row({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div className="flex justify-between gap-3">
+      <span className="text-slate-500">{label}</span>
+      <span className="font-medium">{children}</span>
+    </div>
   );
 }
 
@@ -334,3 +444,4 @@ function RoleEditModal({
     </Modal>
   );
 }
+

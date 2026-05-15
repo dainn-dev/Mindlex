@@ -130,20 +130,34 @@ export interface ChatQuotaPayload {
   allowed: boolean;
   resetAtUtc: string;
 }
+/** Matches GET /chat/tone. */
+export interface ChatToneInfo {
+  tone: Tone;
+  defaultTone: Tone;
+  tier: string;
+  description: string;
+  manualOverrideAvailable: boolean;
+  overridden: boolean;
+}
+
 export interface ChatQuotaResponse {
   quota: ChatQuotaPayload;
   tone: Tone;
 }
 
+/** Matches GET /documents row shape. */
 export interface DocFile {
   id: string;
-  name: string;
-  type: string;
-  size: number;
-  modifiedAt: string;
-  source: "own" | "shared";
+  fileName: string;
+  documentType: string;
   tags: string[];
-  anonymization?: { notice: string | null; piiRemoved: boolean };
+  editedBy: string;
+  sizeDisplay: string;
+  sizeBytes: number;
+  createdAt: string;
+  lastModifiedAt: string;
+  source: "own" | "shared" | "uploaded";
+  actions: string[];
 }
 
 export interface NewsArticle {
@@ -151,7 +165,7 @@ export interface NewsArticle {
   headline: string;
   summary: string;
   topics: string[];
-  publicationDate: string;
+  publishedAt?: string;
   sourceUrl: string;
   isUnread: boolean;
 }

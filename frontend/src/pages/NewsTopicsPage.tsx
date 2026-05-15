@@ -17,8 +17,8 @@ export function NewsTopicsPage() {
 
   useEffect(() => {
     api.get("/news/topics").then((r) => {
-      setAvailable(r.data.available ?? []);
-      setSelected(new Set(r.data.selected ?? []));
+      setAvailable(r.data.availableTopics ?? []);
+      setSelected(new Set(r.data.selectedTopics ?? []));
       setCanEdit(r.data.canEdit ?? true);
     }).catch(() => undefined);
   }, []);

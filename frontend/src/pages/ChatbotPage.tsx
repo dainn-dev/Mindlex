@@ -99,8 +99,7 @@ export function ChatbotPage() {
         message: text,
         threadId,
         history,
-        mode: opts.mode,
-        uploadId: currentUpload
+        mode: opts.mode ?? "qa"
       });
 
       if (data.threadId && !threadId) setThreadId(data.threadId);
@@ -145,6 +144,17 @@ export function ChatbotPage() {
     } finally {
       setBusy(false);
     }
+  };
+
+  const removeCurrentUpload = async () => {
+    if (!threadId || !uploadId) { setUploadId(null); setCompliance(null); setRisks(null); return; }
+    try {
+      await api.delete(`/chat/threads/${threadId}/uploads/${uploadId}`);
+    } catch {/* ignore — local state still cleared */}
+    setUploadId(null);
+    setCompliance(null);
+    setRisks(null);
+    showToast("info", "Attached file removed.");
   };
 
   const downloadReport = async () => {
@@ -250,6 +260,7 @@ export function ChatbotPage() {
           tone={tone}
           onToneChange={onToneChange}
           canToggleTone={canToggleTone}
+          onRemoveUpload={removeCurrentUpload}
           disabled={busy || quota?.allowed === false}
           quotaBanner={
             quota?.allowed === false && (

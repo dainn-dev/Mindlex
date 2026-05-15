@@ -1,4 +1,5 @@
 // UM19 \u2014 First-login onboarding with 5 feature cards + example questions
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Scale, Newspaper, FolderOpen, Pencil, ShieldCheck } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
@@ -24,6 +25,13 @@ const examples = [
 export function OnboardingPage() {
   const navigate = useNavigate();
   const user = useAuthStore((s) => s.user);
+
+  // Skip onboarding if user has already gone through it (avoids re-showing it).
+  useEffect(() => {
+    api.get<{ completed: boolean }>("/profile/onboarding/status")
+      .then((r) => { if (r.data?.completed) navigate("/chatbot", { replace: true }); })
+      .catch(() => undefined);
+  }, [navigate]);
 
   const finish = async () => {
     try { await api.post("/profile/onboarding/complete"); } catch {/* ignore */}

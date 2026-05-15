@@ -69,10 +69,10 @@ export function NewsFeedPage() {
               >
                 <div className="bg-slate-100 rounded-md p-2.5 text-center">
                   <div className="text-2xl font-bold text-navy">
-                    {new Date(a.publicationDate).getDate()}
+                    {new Date(a.publishedAt ?? Date.now()).getDate()}
                   </div>
                   <div className="text-[11px] uppercase text-slate-500">
-                    {new Date(a.publicationDate).toLocaleString("en-US", { month: "short" })}
+                    {new Date(a.publishedAt ?? Date.now()).toLocaleString("en-US", { month: "short" })}
                   </div>
                 </div>
                 <div>

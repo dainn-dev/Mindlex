@@ -1,5 +1,5 @@
 // UM7 + UM9 + UM16 + LC6 \u2014 Profile, password, tone, download data, logout
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { Key, Download as DownloadIcon, LogOut } from "lucide-react";
 import { useAuthStore } from "@/store/authStore";
 import { useUiStore } from "@/store/uiStore";
@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/Input";
 import { Modal } from "@/components/ui/Modal";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import { validators } from "@/lib/utils";
+import type { ChatToneInfo, Tone } from "@/types";
 
 export function MyAccountPage() {
   const user = useAuthStore((s) => s.user);
@@ -20,8 +21,15 @@ export function MyAccountPage() {
   const [showName, setShowName] = useState(false);
   const [showPwd, setShowPwd] = useState(false);
   const [confirmLogout, setConfirmLogout] = useState(false);
+  const [toneInfo, setToneInfo] = useState<ChatToneInfo | null>(null);
 
-  const isPaid = user?.roles.some((r) => r === "Plus" || r === "Premium" || r === "Admin") ?? false;
+  useEffect(() => {
+    api.get<ChatToneInfo>("/chat/tone")
+      .then((r) => setToneInfo(r.data))
+      .catch(() => undefined);
+  }, []);
+
+  const canOverrideTone = toneInfo?.manualOverrideAvailable ?? false;
 
   const downloadMyData = async () => {
     try {
@@ -32,6 +40,20 @@ export function MyAccountPage() {
       URL.revokeObjectURL(url);
       showToast("success", "Download started");
     } catch { showToast("danger", "Could not download data"); }
+  };
+
+  const switchTone = async (newTone: Tone) => {
+    setTone(newTone);
+    try {
+      await api.put("/chat/tone", { tone: newTone });
+      setToneInfo((info) => info && {
+        ...info,
+        tone: newTone,
+        overridden: newTone !== info.defaultTone
+      });
+    } catch (e) {
+      showToast("danger", apiError(e));
+    }
   };
 
   return (
@@ -59,26 +81,33 @@ export function MyAccountPage() {
 
         <div className="card">
           <h3 className="text-navy mb-3.5">Preferences</h3>
-          {isPaid && (
-            <Field label="Chatbot tone">
+          {canOverrideTone ? (
+            <Field label={`Chatbot tone${toneInfo?.overridden ? " (overridden)" : ""}`}>
               <div className="inline-flex bg-slate-100 rounded-full p-1">
-                {(["plain", "technical"] as const).map((t) => (
+                {(["plain", "technical"] as const).map((opt) => (
                   <button
-                    key={t}
-                    onClick={async () => {
-                      setTone(t);
-                      try { await api.put("/chat/tone", { tone: t }); } catch {/**/}
-                    }}
+                    key={opt}
+                    onClick={() => switchTone(opt)}
                     className={`px-3 py-1 rounded-full text-sm capitalize ${
-                      user?.tone === t ? "bg-white text-navy shadow-sm" : "text-slate-500"
+                      (toneInfo?.tone ?? user?.tone) === opt ? "bg-white text-navy shadow-sm" : "text-slate-500"
                     }`}
                   >
-                    {t}
+                    {opt}
                   </button>
                 ))}
               </div>
+              {toneInfo?.description && (
+                <p className="text-xs text-slate-400 mt-1.5">{toneInfo.description}</p>
+              )}
             </Field>
-          )}
+          ) : toneInfo ? (
+            <Field label="Chatbot tone">
+              <span className="capitalize">{toneInfo.tone}</span>
+              <p className="text-xs text-slate-400 mt-1">
+                Tone override is available on Plus and Premium plans.
+              </p>
+            </Field>
+          ) : null}
           <Button variant="outline" full onClick={() => setShowPwd(true)} className="mb-2.5">
             <Key size={14} /> Change password
           </Button>

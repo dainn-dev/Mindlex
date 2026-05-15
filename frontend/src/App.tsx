@@ -19,6 +19,7 @@ import { LoginPage } from "@/pages/LoginPage";
 import { ForgotPasswordPage } from "@/pages/ForgotPasswordPage";
 import { ResetPasswordPage } from "@/pages/ResetPasswordPage";
 import { OnboardingPage } from "@/pages/OnboardingPage";
+import { OAuthCompleteProfilePage } from "@/pages/OAuthCompleteProfilePage";
 import { ChatbotPage } from "@/pages/ChatbotPage";
 import { NewsFeedPage } from "@/pages/NewsFeedPage";
 import { NewsTopicsPage } from "@/pages/NewsTopicsPage";
@@ -52,6 +53,9 @@ export function App() {
         <Route path="/verify-email" element={<EmailVerifyPage />} />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
         <Route path="/reset-password" element={<ResetPasswordPage />} />
+        <Route path="/oauth/complete-profile" element={
+          <ProtectedRoute><OAuthCompleteProfilePage /></ProtectedRoute>
+        } />
 
         {/* Checkout result pages — standalone */}
         <Route path="/checkout/success" element={

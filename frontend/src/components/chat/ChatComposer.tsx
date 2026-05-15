@@ -11,10 +11,12 @@ interface Props {
   canToggleTone: boolean;
   disabled?: boolean;
   quotaBanner?: React.ReactNode;
+  /** Called when user removes an already-uploaded file (server-side delete). */
+  onRemoveUpload?: () => void;
 }
 
 export function ChatComposer({
-  onSend, tone, onToneChange, canToggleTone, disabled, quotaBanner
+  onSend, tone, onToneChange, canToggleTone, disabled, quotaBanner, onRemoveUpload
 }: Props) {
   const [text, setText] = useState("");
   const [file, setFile] = useState<File | null>(null);
@@ -35,6 +37,11 @@ export function ChatComposer({
     }
   };
 
+  const removeFile = () => {
+    setFile(null);
+    onRemoveUpload?.();
+  };
+
   return (
     <div className="border-t border-slate-200 bg-white p-3.5">
       {quotaBanner}
@@ -42,7 +49,7 @@ export function ChatComposer({
         {file && (
           <span className="chip-warn">
             <Paperclip size={11} /> {file.name}
-            <button onClick={() => setFile(null)} className="ml-1" aria-label="Remove file">
+            <button onClick={removeFile} className="ml-1" aria-label="Remove file">
               <X size={12} />
             </button>
           </span>
