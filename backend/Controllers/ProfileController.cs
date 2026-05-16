@@ -66,17 +66,36 @@ public class ProfileController : ControllerBase
     private string? UserAgent => Request.Headers.UserAgent.ToString();
 
     [HttpGet]
+    [HttpGet("me")]
     public async Task<IActionResult> GetMyProfile(CancellationToken ct)
     {
         var userId = CurrentUserId;
         if (userId is null) return Unauthorized();
 
         var profile = await _profiles.GetProfileAsync(userId.Value, ct);
+        var roleNames = (await _roles.GetUserRolesAsync(userId.Value, ct)).Select(r => r.Name).ToList();
+
+        // Check onboarding status
+        var onboardingCompleted = profile.DateOfBirth is not null;
+
+        // Resolve tone preference
+        var tone = ChatController.TonePlain;
+        if (roleNames.Any(r => string.Equals(r, RoleSeeder.PlusRoleName, StringComparison.OrdinalIgnoreCase)
+                              || string.Equals(r, RoleSeeder.PremiumRoleName, StringComparison.OrdinalIgnoreCase)
+                              || string.Equals(r, RoleSeeder.AdminRoleName, StringComparison.OrdinalIgnoreCase)))
+        {
+            tone = ChatController.ToneTechnical;
+        }
+
         return Ok(new
         {
+            id = userId.Value,
             email = profile.Email,
-            fullName = profile.DisplayName,
-            dateOfBirth = profile.DateOfBirth
+            fullName = profile.DisplayName ?? profile.Email,
+            dateOfBirth = profile.DateOfBirth,
+            roles = roleNames,
+            tone,
+            onboardingCompleted
         });
     }
 
@@ -133,7 +152,7 @@ public class ProfileController : ControllerBase
         if (userId is null) return Unauthorized();
 
         var (activities, _) = await _activity.GetActivityLogAsync(
-            userId.Value, pageNumber: 1, pageSize: 200,
+            userId.Value, pageNumber: 1, pageSize: 100,
             activityType: ActivityType.ProfileUpdate,
             startDate: null, endDate: null, ct);
 
@@ -154,7 +173,7 @@ public class ProfileController : ControllerBase
         if (userId is null) return Unauthorized();
 
         var (existing, _) = await _activity.GetActivityLogAsync(
-            userId.Value, pageNumber: 1, pageSize: 200,
+            userId.Value, pageNumber: 1, pageSize: 100,
             activityType: ActivityType.ProfileUpdate,
             startDate: null, endDate: null, ct);
 
@@ -205,7 +224,7 @@ public class ProfileController : ControllerBase
             .FirstOrDefaultAsync(ct);
 
         var (recentLogins, _) = await _loginHistory.GetLoginHistoryAsync(
-            userId.Value, pageNumber: 1, pageSize: 200, startDate: null, endDate: null, ct);
+            userId.Value, pageNumber: 1, pageSize: 100, startDate: null, endDate: null, ct);
 
         var ipAddresses = recentLogins
             .Where(h => h.IsSuccessful && !string.IsNullOrWhiteSpace(h.IpAddress))

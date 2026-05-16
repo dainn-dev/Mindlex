@@ -32,6 +32,7 @@ import {
 import { BillingPage } from "@/pages/account/BillingPage";
 import { AdminUsersPage } from "@/pages/admin/AdminUsersPage";
 import { AdminSubscriptionsPage } from "@/pages/admin/AdminSubscriptionsPage";
+import { AdminAnalyticsPage } from "@/pages/admin/AdminAnalyticsPage";
 import { NotFoundPage } from "@/pages/NotFoundPage";
 
 export function App() {
@@ -95,6 +96,7 @@ export function App() {
             <Route index element={<Navigate to="/admin/users" replace />} />
             <Route path="users" element={<AdminUsersPage />} />
             <Route path="subscriptions" element={<AdminSubscriptionsPage />} />
+            <Route path="analytics" element={<AdminAnalyticsPage />} />
           </Route>
         </Route>
 

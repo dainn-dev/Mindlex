@@ -394,6 +394,8 @@ public class SubscriptionController : ControllerBase
 
     private static string ResolveTier(IList<string> roleNames)
     {
+        if (roleNames.Any(r => string.Equals(r, RoleSeeder.AdminRoleName, StringComparison.OrdinalIgnoreCase)))
+            return RoleSeeder.PremiumRoleName;
         if (roleNames.Any(r => string.Equals(r, RoleSeeder.PremiumRoleName, StringComparison.OrdinalIgnoreCase)))
             return RoleSeeder.PremiumRoleName;
         if (roleNames.Any(r => string.Equals(r, RoleSeeder.PlusRoleName, StringComparison.OrdinalIgnoreCase)))

@@ -109,7 +109,7 @@ public sealed class InactiveAccountSweeperService : BackgroundService
             }
 
             var (activities, _) = await activityService.GetActivityLogAsync(
-                user.Id, pageNumber: 1, pageSize: 500,
+                user.Id, pageNumber: 1, pageSize: 100,
                 activityType: ActivityType.AccountDeactivated,
                 startDate: null, endDate: null, ct);
 

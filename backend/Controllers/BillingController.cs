@@ -74,6 +74,21 @@ public class BillingController : ControllerBase
         string? message = null;
         bool showUpgrade = false;
 
+        // Admin accounts have permanent Premium access without a Stripe subscription
+        var isAdmin = roleNames.Any(r => string.Equals(r, RoleSeeder.AdminRoleName, StringComparison.OrdinalIgnoreCase));
+        if (isAdmin)
+        {
+            return Ok(new
+            {
+                currentRole = "Admin (Premium)",
+                status = "Active",
+                nextPaymentDue = (DateTime?)null,
+                lastPaymentDate = (DateTime?)null,
+                message = (string?)null,
+                showUpgradeButton = false
+            });
+        }
+
         if (string.Equals(currentTier, RoleSeeder.FreeRoleName, StringComparison.OrdinalIgnoreCase))
         {
             var paidEndedRecently =
@@ -135,6 +150,8 @@ public class BillingController : ControllerBase
 
     private static string ResolveTier(IList<string> roleNames)
     {
+        if (roleNames.Any(r => string.Equals(r, RoleSeeder.AdminRoleName, StringComparison.OrdinalIgnoreCase)))
+            return RoleSeeder.PremiumRoleName;
         if (roleNames.Any(r => string.Equals(r, RoleSeeder.PremiumRoleName, StringComparison.OrdinalIgnoreCase)))
             return RoleSeeder.PremiumRoleName;
         if (roleNames.Any(r => string.Equals(r, RoleSeeder.PlusRoleName, StringComparison.OrdinalIgnoreCase)))

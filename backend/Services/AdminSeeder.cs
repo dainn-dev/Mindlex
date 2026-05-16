@@ -63,13 +63,28 @@ public sealed class AdminSeeder : IHostedService
             Guid userId;
             if (existing is null)
             {
-                userId = await auth.RegisterAsync(admin.Email, admin.Email, admin.Password, cancellationToken);
-                _logger.LogInformation("Seeded admin account {Email}.", admin.Email);
-
-                await profiles.UpdateProfileAsync(userId, new UpdateProfileDto
+                try
                 {
-                    DisplayName = admin.FullName
-                }, cancellationToken);
+                    userId = await auth.RegisterAsync(admin.Email, admin.Email, admin.Password, cancellationToken);
+                    _logger.LogInformation("Seeded admin account {Email}.", admin.Email);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Failed to register admin {Email} (email service unavailable?). Skipping.", admin.Email);
+                    continue;
+                }
+
+                try
+                {
+                    await profiles.UpdateProfileAsync(userId, new UpdateProfileDto
+                    {
+                        DisplayName = admin.FullName
+                    }, cancellationToken);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Failed to update profile for admin {Email}.", admin.Email);
+                }
             }
             else
             {

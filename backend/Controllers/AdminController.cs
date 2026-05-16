@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Mindlex.Controllers;
+using Mindlex.Data;
 using Mindlex.Models;
 using Mindlex.Services;
 using Stripe;
@@ -33,6 +34,7 @@ public class AdminController : ControllerBase
     private readonly IEmailService _email;
     private readonly DainnStripeDbContext _stripeDb;
     private readonly DainnUserDbContext _userDb;
+    private readonly MindlexDbContext _mindlexDb;
     private readonly Sr2DataRetentionService _retention;
     private readonly IConfiguration _config;
     private readonly ILogger<AdminController> _logger;
@@ -47,6 +49,7 @@ public class AdminController : ControllerBase
         IEmailService email,
         DainnStripeDbContext stripeDb,
         DainnUserDbContext userDb,
+        MindlexDbContext mindlexDb,
         Sr2DataRetentionService retention,
         IConfiguration config,
         ILogger<AdminController> logger)
@@ -60,6 +63,7 @@ public class AdminController : ControllerBase
         _email = email;
         _stripeDb = stripeDb;
         _userDb = userDb;
+        _mindlexDb = mindlexDb;
         _retention = retention;
         _config = config;
         _logger = logger;
@@ -88,8 +92,8 @@ public class AdminController : ControllerBase
         if (page < 1) page = 1;
         if (pageSize is < 1 or > 200) pageSize = 20;
 
-        var result = await _users.GetUsersAsync(page, pageSize, search ?? string.Empty, status, ct);
-        return Ok(result);
+        var (users, totalCount) = await _users.GetUsersAsync(page, pageSize, search ?? string.Empty, status, ct);
+        return Ok(new { users, totalCount, page, pageSize });
     }
 
     [HttpGet("users/download")]
@@ -501,6 +505,198 @@ public class AdminController : ControllerBase
         });
 
         return Ok(rows);
+    }
+
+    [HttpGet("analytics")]
+    public async Task<IActionResult> GetAnalytics(CancellationToken ct)
+    {
+        // ---------- Users + roles ----------
+        var users = await _userDb.Users
+            .Include(u => u.Profile)
+            .Where(u => !u.Email.EndsWith(Sr2DataRetentionService.TombstoneEmailSuffix))
+            .AsNoTracking()
+            .ToListAsync(ct);
+
+        var roleByUser = new Dictionary<Guid, string>();
+        foreach (var u in users)
+        {
+            var roles = (await _roles.GetUserRolesAsync(u.Id, ct)).Select(r => r.Name).ToList();
+            roleByUser[u.Id] = ResolveTier(roles);
+        }
+
+        var totalUsers = users.Count;
+        var freeUsers = roleByUser.Values.Count(t => string.Equals(t, RoleSeeder.FreeRoleName, StringComparison.OrdinalIgnoreCase));
+        var plusUsers = roleByUser.Values.Count(t => string.Equals(t, RoleSeeder.PlusRoleName, StringComparison.OrdinalIgnoreCase));
+        var premiumUsers = roleByUser.Values.Count(t => string.Equals(t, RoleSeeder.PremiumRoleName, StringComparison.OrdinalIgnoreCase));
+        var activeSubscribers = plusUsers + premiumUsers;
+        var conversionRate = totalUsers == 0 ? 0d : Math.Round(activeSubscribers * 100d / totalUsers, 1);
+
+        var activeStatus = users.Count(u => u.Status == UserStatus.Active);
+        var deactivatedStatus = users.Count(u => u.Status == UserStatus.Deactivated);
+        var lockedStatus = users.Count(u => u.Status == UserStatus.Locked);
+        var pendingStatus = users.Count(u => u.Status == UserStatus.Pending);
+        var suspendedStatus = users.Count(u => u.Status == UserStatus.Suspended);
+
+        // ---------- Signups last 30 days ----------
+        var now = DateTime.UtcNow;
+        var since30 = now.Date.AddDays(-29);
+        var signupBuckets = new int[30];
+        foreach (var u in users)
+        {
+            if (u.CreatedAt.Date < since30) continue;
+            var idx = (int)(u.CreatedAt.Date - since30).TotalDays;
+            if (idx >= 0 && idx < 30) signupBuckets[idx]++;
+        }
+        var signupSeries = Enumerable.Range(0, 30).Select(i => new
+        {
+            date = since30.AddDays(i).ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
+            count = signupBuckets[i]
+        }).ToList();
+        var newUsers30d = signupBuckets.Sum();
+
+        // ---------- Revenue (last 12 months from successful payments) ----------
+        var userIdStrings = users.Select(u => u.Id.ToString()).ToHashSet();
+        var since12mo = new DateTime(now.Year, now.Month, 1, 0, 0, 0, DateTimeKind.Utc).AddMonths(-11);
+        var payments = await _stripeDb.DainnStripePayments
+            .Where(p => userIdStrings.Contains(p.OwnerId)
+                     && p.Status == DainnStripePaymentStatus.Succeeded
+                     && p.CreatedAt >= since12mo)
+            .AsNoTracking()
+            .ToListAsync(ct);
+
+        var revenueSeries = new List<object>();
+        long totalRevenueCents = 0;
+        long currentMonthRevenue = 0;
+        var thisMonthStart = new DateTime(now.Year, now.Month, 1, 0, 0, 0, DateTimeKind.Utc);
+        for (int i = 0; i < 12; i++)
+        {
+            var start = since12mo.AddMonths(i);
+            var end = start.AddMonths(1);
+            var monthSum = payments.Where(p => p.CreatedAt >= start && p.CreatedAt < end).Sum(p => p.Amount);
+            totalRevenueCents += monthSum;
+            if (start == thisMonthStart) currentMonthRevenue = monthSum;
+            revenueSeries.Add(new
+            {
+                month = start.ToString("yyyy-MM", CultureInfo.InvariantCulture),
+                label = start.ToString("MMM", CultureInfo.InvariantCulture),
+                amount = monthSum / 100m
+            });
+        }
+
+        // ---------- MRR estimate (sum of monthly-equivalent of active subs) ----------
+        var subs = await _stripeDb.DainnStripeSubscriptions
+            .Where(s => userIdStrings.Contains(s.OwnerId) && s.Status == DainnStripeSubscriptionStatus.Active)
+            .AsNoTracking()
+            .ToListAsync(ct);
+
+        var plans = _config.GetSection("Mindlex:Plans").Get<List<PlanOptions>>() ?? new();
+        decimal mrrEur = 0m;
+        foreach (var s in subs)
+        {
+            if (string.IsNullOrWhiteSpace(s.StripePriceId)) continue;
+            foreach (var plan in plans)
+            {
+                foreach (var pricing in plan.Pricing.Values)
+                {
+                    if (string.Equals(pricing.StripeMonthlyPriceId, s.StripePriceId, StringComparison.OrdinalIgnoreCase))
+                    {
+                        mrrEur += pricing.MonthlyPriceCents / 100m;
+                    }
+                    else if (string.Equals(pricing.StripeAnnualPriceId, s.StripePriceId, StringComparison.OrdinalIgnoreCase))
+                    {
+                        mrrEur += (pricing.AnnualPriceCents / 12m) / 100m;
+                    }
+                }
+            }
+        }
+
+        // ---------- Engagement (chat / drive / news) ----------
+        var chatThreads = await _mindlexDb.ChatThreads.CountAsync(ct);
+        var since7 = now.AddDays(-7);
+        var chatMessages7d = await _mindlexDb.ChatMessages.CountAsync(m => m.CreatedAt >= since7, ct);
+        var savedDocs = await _mindlexDb.SavedDocuments.CountAsync(ct);
+        var newsArticlesTotal = await _mindlexDb.NewsArticles.CountAsync(ct);
+        var newsArticles30d = await _mindlexDb.NewsArticles.CountAsync(a => a.IngestedAt >= since30, ct);
+
+        // Top news topics
+        var allTopics = await _mindlexDb.NewsArticles
+            .Select(a => a.TopicsCsv)
+            .ToListAsync(ct);
+        var topicCounts = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+        foreach (var csv in allTopics)
+        {
+            if (string.IsNullOrWhiteSpace(csv)) continue;
+            foreach (var t in csv.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+            {
+                topicCounts[t] = topicCounts.TryGetValue(t, out var c) ? c + 1 : 1;
+            }
+        }
+        var topTopics = topicCounts
+            .OrderByDescending(kv => kv.Value)
+            .Take(6)
+            .Select(kv => new { topic = kv.Key, count = kv.Value })
+            .ToList();
+
+        // ---------- Recent payments (latest 5) ----------
+        var recentPayments = payments
+            .OrderByDescending(p => p.CreatedAt)
+            .Take(5)
+            .Select(p =>
+            {
+                Guid.TryParse(p.OwnerId, out var ownerGuid);
+                var user = users.FirstOrDefault(u => u.Id == ownerGuid);
+                return new
+                {
+                    id = p.Id,
+                    paidAt = p.CreatedAt,
+                    paidAtDisplay = p.CreatedAt.ToString("dd MMM yyyy", CultureInfo.InvariantCulture),
+                    fullName = user?.Profile?.DisplayName ?? user?.Email ?? "—",
+                    email = user?.Email,
+                    amount = p.Amount / 100m,
+                    amountDisplay = FormatAmount(p.Amount, p.Currency),
+                    currency = p.Currency
+                };
+            })
+            .ToList();
+
+        return Ok(new
+        {
+            generatedAt = now,
+            totals = new
+            {
+                users = totalUsers,
+                activeSubscribers,
+                conversionRate,
+                mrr = Math.Round(mrrEur, 2),
+                mrrCurrency = "EUR",
+                currentMonthRevenue = currentMonthRevenue / 100m,
+                totalRevenue12mo = totalRevenueCents / 100m,
+                newUsers30d,
+                chatThreads,
+                chatMessages7d,
+                savedDocs,
+                newsArticlesTotal,
+                newsArticles30d
+            },
+            tierBreakdown = new
+            {
+                free = freeUsers,
+                plus = plusUsers,
+                premium = premiumUsers
+            },
+            statusBreakdown = new
+            {
+                active = activeStatus,
+                pending = pendingStatus,
+                suspended = suspendedStatus,
+                locked = lockedStatus,
+                deactivated = deactivatedStatus
+            },
+            signupSeries,
+            revenueSeries,
+            topTopics,
+            recentPayments
+        });
     }
 
     [HttpGet("users/{userId:guid}/subscription")]

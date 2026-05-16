@@ -3,6 +3,7 @@ using DainnStripe.Data;
 using DainnUser.Infrastructure;
 using DainnUser.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Mindlex.Data;
 using Mindlex.Services;
 using Mindlex.Services.News;
@@ -19,6 +20,7 @@ builder.Services.AddDainnUser(builder.Configuration, options =>
     options.EnableActivityLogging = true;
     options.PasswordResetTokenExpirationHours = 1;
 });
+
 
 builder.Services.AddDainnStripe(builder.Configuration);
 
@@ -71,9 +73,29 @@ using (var scope = app.Services.CreateScope())
         try
         {
             var ctx = sp.GetRequiredService<TCtx>();
-            var created = await ctx.Database.EnsureCreatedAsync();
-            logger.LogInformation("{Context}: schema {Status}",
-                typeof(TCtx).Name, created ? "created" : "already present");
+            // EnsureCreatedAsync returns false if the database already exists (even if
+            // this context's tables are missing). Use GetPendingMigrationsAsync first;
+            // if no migrations exist for this context, fall back to creating tables
+            // via the RelationalDatabaseCreator which handles the multi-context case.
+            var databaseCreator = ctx.Database.GetService<Microsoft.EntityFrameworkCore.Storage.IRelationalDatabaseCreator>();
+            if (!await databaseCreator.ExistsAsync())
+            {
+                await ctx.Database.EnsureCreatedAsync();
+                logger.LogInformation("{Context}: schema created (new database)", typeof(TCtx).Name);
+            }
+            else
+            {
+                // Database exists — create only this context's tables if missing
+                try
+                {
+                    await databaseCreator.CreateTablesAsync();
+                    logger.LogInformation("{Context}: tables created", typeof(TCtx).Name);
+                }
+                catch (Npgsql.PostgresException ex) when (ex.SqlState == "42P07") // duplicate_table
+                {
+                    logger.LogInformation("{Context}: tables already present", typeof(TCtx).Name);
+                }
+            }
         }
         catch (Exception ex)
         {

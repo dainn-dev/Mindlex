@@ -719,7 +719,7 @@ public class ChatController : ControllerBase
         if (userId is null) return Unauthorized();
 
         var (activities, _) = await _activity.GetActivityLogAsync(
-            userId.Value, pageNumber: 1, pageSize: 500,
+            userId.Value, pageNumber: 1, pageSize: 100,
             activityType: ActivityType.ProfileUpdate,
             startDate: null, endDate: null, ct);
 
@@ -870,7 +870,7 @@ public class ChatController : ControllerBase
             ct);
 
         var (activities, _) = await _activity.GetActivityLogAsync(
-            userId, pageNumber: 1, pageSize: 500,
+            userId, pageNumber: 1, pageSize: 100,
             activityType: ActivityType.ProfileUpdate,
             startDate: windowStart, endDate: null, ct);
 
@@ -965,6 +965,8 @@ public class ChatController : ControllerBase
     private async Task<string> ResolveTierAsync(Guid userId, CancellationToken ct)
     {
         var roleNames = (await _roles.GetUserRolesAsync(userId, ct)).Select(r => r.Name).ToList();
+        if (roleNames.Any(r => string.Equals(r, RoleSeeder.AdminRoleName, StringComparison.OrdinalIgnoreCase)))
+            return RoleSeeder.PremiumRoleName; // Admin gets Premium-level access
         if (roleNames.Any(r => string.Equals(r, RoleSeeder.PremiumRoleName, StringComparison.OrdinalIgnoreCase)))
             return RoleSeeder.PremiumRoleName;
         if (roleNames.Any(r => string.Equals(r, RoleSeeder.PlusRoleName, StringComparison.OrdinalIgnoreCase)))
@@ -989,7 +991,7 @@ public class ChatController : ControllerBase
         }
 
         var (activities, _) = await _activity.GetActivityLogAsync(
-            userId, pageNumber: 1, pageSize: 500,
+            userId, pageNumber: 1, pageSize: 100,
             activityType: ActivityType.ProfileUpdate,
             startDate: windowStart, endDate: now, ct);
 

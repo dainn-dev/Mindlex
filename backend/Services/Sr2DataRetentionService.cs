@@ -132,7 +132,7 @@ public sealed class Sr2DataRetentionService
         foreach (var userId in candidates)
         {
             var (activities, _) = await _activity.GetActivityLogAsync(
-                userId, pageNumber: 1, pageSize: 200,
+                userId, pageNumber: 1, pageSize: 100,
                 activityType: ActivityType.AccountDeactivated,
                 startDate: null, endDate: null, ct);
 
