@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
+using Pgvector;
 
-namespace Mindlex.Data;
+namespace MyLaw.Data;
 
 public sealed class ChatThread
 {
@@ -93,9 +94,25 @@ public sealed class SavedDocument
     public Guid? SourceThreadId { get; set; }
 }
 
-public sealed class MindlexDbContext : DbContext
+public sealed class LegalDocument
 {
-    public MindlexDbContext(DbContextOptions<MindlexDbContext> options) : base(options) { }
+    public long Id { get; set; }
+    public string SourceUrl { get; set; } = string.Empty;
+    public string? Title { get; set; }
+    public string Content { get; set; } = string.Empty;
+    public string? CaseNumber { get; set; }
+    public string? Jurisdiction { get; set; }
+    public string? Category { get; set; }
+    public string? Parties { get; set; }
+    public string? CaseDate { get; set; }
+    public Vector? Embedding { get; set; }
+    public DateTime? EmbeddedAt { get; set; }
+    public DateTime CreatedAt { get; set; }
+}
+
+public sealed class MyLawDbContext : DbContext
+{
+    public MyLawDbContext(DbContextOptions<MyLawDbContext> options) : base(options) { }
 
     public DbSet<ChatThread> ChatThreads => Set<ChatThread>();
     public DbSet<ChatMessage> ChatMessages => Set<ChatMessage>();
@@ -104,9 +121,23 @@ public sealed class MindlexDbContext : DbContext
     public DbSet<SavedDocument> SavedDocuments => Set<SavedDocument>();
     public DbSet<DocumentShare> DocumentShares => Set<DocumentShare>();
     public DbSet<ChatUpload> ChatUploads => Set<ChatUpload>();
+    public DbSet<LegalDocument> LegalDocuments => Set<LegalDocument>();
 
     protected override void OnModelCreating(ModelBuilder b)
     {
+        b.HasPostgresExtension("vector");
+
+        b.Entity<LegalDocument>(e =>
+        {
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Id).ValueGeneratedNever();
+            e.Property(x => x.SourceUrl).IsRequired();
+            e.Property(x => x.Content).IsRequired();
+            e.Property(x => x.Embedding).HasColumnType("vector(384)");
+            e.HasIndex(x => x.CaseNumber);
+            e.HasIndex(x => x.Jurisdiction);
+        });
+
         b.Entity<ChatThread>(e =>
         {
             e.HasKey(x => x.Id);

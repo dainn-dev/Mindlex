@@ -4,9 +4,10 @@ using DainnUser.Infrastructure;
 using DainnUser.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Mindlex.Data;
-using Mindlex.Services;
-using Mindlex.Services.News;
+using MyLaw.Data;
+using MyLaw.Services;
+using MyLaw.Services.News;
+using Npgsql;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -24,8 +25,12 @@ builder.Services.AddDainnUser(builder.Configuration, options =>
 
 builder.Services.AddDainnStripe(builder.Configuration);
 
-builder.Services.AddDbContext<MindlexDbContext>(opt =>
-    opt.UseNpgsql(builder.Configuration.GetConnectionString("Mindlex")));
+var myLawDsBuilder = new NpgsqlDataSourceBuilder(
+    builder.Configuration.GetConnectionString("MyLaw"));
+myLawDsBuilder.UseVector();
+var myLawDataSource = myLawDsBuilder.Build();
+builder.Services.AddDbContext<MyLawDbContext>(opt =>
+    opt.UseNpgsql(myLawDataSource, o => o.UseVector()));
 
 builder.Services.AddHostedService<RoleSeeder>();
 builder.Services.AddHostedService<ChatThreadRetentionSweeperService>();
@@ -37,12 +42,13 @@ builder.Services.AddScoped<INewsSourceFetcher, BailiiFetcher>();
 builder.Services.AddScoped<INewsSourceFetcher, EchrFetcher>();
 builder.Services.AddScoped<INewsSourceFetcher, CuriaFetcher>();
 builder.Services.AddScoped<Sr2DataRetentionService>();
-builder.Services.AddScoped<Mindlex.Services.Documents.IDocumentClassifier, Mindlex.Services.Documents.KeywordDocumentClassifier>();
-builder.Services.AddScoped<Mindlex.Services.Documents.IPiiSanitizer, Mindlex.Services.Documents.RegexPiiSanitizer>();
-builder.Services.AddScoped<Mindlex.Services.Documents.IUploadAnonymizer, Mindlex.Services.Documents.UploadAnonymizer>();
-builder.Services.AddScoped<Mindlex.Services.Documents.IComplianceChecker, Mindlex.Services.Documents.StubComplianceChecker>();
-builder.Services.AddScoped<Mindlex.Services.Documents.IRiskAnalyzer, Mindlex.Services.Documents.StubRiskAnalyzer>();
-builder.Services.AddScoped<DainnStripe.Interfaces.IStripeWebhookHandler, MindlexSubscriptionWebhookHandler>();
+builder.Services.AddScoped<MyLaw.Services.Documents.IDocumentClassifier, MyLaw.Services.Documents.KeywordDocumentClassifier>();
+builder.Services.AddScoped<MyLaw.Services.Documents.IPiiSanitizer, MyLaw.Services.Documents.RegexPiiSanitizer>();
+builder.Services.AddScoped<MyLaw.Services.Documents.IUploadAnonymizer, MyLaw.Services.Documents.UploadAnonymizer>();
+builder.Services.AddScoped<MyLaw.Services.Documents.IComplianceChecker, MyLaw.Services.Documents.StubComplianceChecker>();
+builder.Services.AddScoped<MyLaw.Services.Documents.IRiskAnalyzer, MyLaw.Services.Documents.StubRiskAnalyzer>();
+builder.Services.AddScoped<DainnStripe.Interfaces.IStripeWebhookHandler, MyLawSubscriptionWebhookHandler>();
+builder.Services.AddScoped<ILegalSearchService, LegalSearchService>();
 builder.Services.AddMemoryCache();
 builder.Services.AddHttpClient();
 
@@ -61,7 +67,7 @@ var app = builder.Build();
 // from the EF model and skips the bad seed inserts entirely. RoleSeeder /
 // AdminSeeder below populate the rows we actually need.
 //
-// MindlexDbContext is our own and has clean migrations, so it still uses
+// MyLawDbContext is our own and has clean migrations, so it still uses
 // `MigrateAsync` to keep history-table tracking working.
 using (var scope = app.Services.CreateScope())
 {
@@ -121,7 +127,7 @@ using (var scope = app.Services.CreateScope())
 
     await EnsureCreatedAsync<DainnUserDbContext>();
     await EnsureCreatedAsync<DainnStripeDbContext>();
-    await MigrateAsync<MindlexDbContext>();
+    await MigrateAsync<MyLawDbContext>();
 }
 
 if (app.Environment.IsDevelopment())

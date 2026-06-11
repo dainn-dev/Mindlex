@@ -1,6 +1,6 @@
 using DainnUser.Core.Interfaces.Services;
 
-namespace Mindlex.Services;
+namespace MyLaw.Services;
 
 public sealed class RoleSeeder : IHostedService
 {

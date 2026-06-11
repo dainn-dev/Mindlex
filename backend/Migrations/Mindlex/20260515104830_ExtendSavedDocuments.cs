@@ -2,7 +2,7 @@
 
 #nullable disable
 
-namespace Mindlex.Migrations.Mindlex
+namespace MyLaw.Migrations.MyLaw
 {
     /// <inheritdoc />
     public partial class ExtendSavedDocuments : Migration

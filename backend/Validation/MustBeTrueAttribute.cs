@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace Mindlex.Validation;
+namespace MyLaw.Validation;
 
 [AttributeUsage(AttributeTargets.Property)]
 public sealed class MustBeTrueAttribute : ValidationAttribute

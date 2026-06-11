@@ -1,13 +1,13 @@
 using System.Text.RegularExpressions;
-using Mindlex.Data;
+using MyLaw.Data;
 
-namespace Mindlex.Services.News;
+namespace MyLaw.Services.News;
 
 /// <summary>
 /// Curia / Court of Justice of the European Union (CJEU) news fetcher.
 ///
 /// Curia publishes RSS for jurisprudence / press releases. Configure URLs
-/// under Mindlex:LegalNews:FeedUrls:Curia. Example:
+/// under MyLaw:LegalNews:FeedUrls:Curia. Example:
 ///   - https://curia.europa.eu/cms/jcms/op/upload/docs/application/xml/jurisprudence-rss-en.xml
 ///
 /// On top of the generic RSS/Atom parsing in RssFetcherBase:

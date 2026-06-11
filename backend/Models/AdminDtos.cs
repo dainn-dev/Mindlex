@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
-using Mindlex.Services;
+using MyLaw.Services;
 
-namespace Mindlex.Models;
+namespace MyLaw.Models;
 
 public class ChangeUserRoleRequest
 {

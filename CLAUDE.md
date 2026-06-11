@@ -195,3 +195,6 @@ Cập nhật sau khi hoàn thành task:
 
 Khi context quá dài (nhiều messages, conversation cũ):
 Run compress-context skill → summarize → archive → rewrite MEMORY.md
+
+
+

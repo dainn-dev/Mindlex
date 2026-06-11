@@ -1,20 +1,20 @@
 services:
   postgres:
-    image: postgres:16-alpine
-    container_name: mindlex-postgres
+    image: pgvector/pgvector:pg16
+    container_name: mylaw-postgres
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: mindlex
+      POSTGRES_DB: mylaw
     # Host port is configurable to avoid collisions with an existing local
     # Postgres install. Container port is always 5432 (backend uses the
     # service name `postgres:5432` over the compose network, unaffected).
     ports:
       - "${POSTGRES_HOST_PORT:-55432}:5432"
     volumes:
-      - mindlex_pgdata:/var/lib/postgresql/data
+      - mylaw_pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d mindlex"]
+      test: ["CMD-SHELL", "pg_isready -U postgres -d mylaw"]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -30,7 +30,7 @@ services:
         NUGET_FEED_URL: ${NUGET_FEED_URL:-}
         NUGET_USERNAME: ${NUGET_USERNAME:-}
         NUGET_PAT:      ${NUGET_PAT:-}
-    container_name: mindlex-backend
+    container_name: mylaw-backend
     depends_on:
       postgres:
         condition: service_healthy
@@ -38,10 +38,10 @@ services:
       ASPNETCORE_ENVIRONMENT: Development
       ASPNETCORE_URLS: http://+:8080
       # Override connection strings to point at the postgres service.
-      ConnectionStrings__Mindlex: "Host=postgres;Port=5432;Database=mindlex;Username=postgres;Password=postgres"
-      ConnectionStrings__DainnStripe: "Host=postgres;Port=5432;Database=mindlex;Username=postgres;Password=postgres"
-      DainnUser__Database__ConnectionString: "Host=postgres;Port=5432;Database=mindlex;Username=postgres;Password=postgres"
-      DainnStripe__Database__ConnectionString: "Host=postgres;Port=5432;Database=mindlex;Username=postgres;Password=postgres"
+      ConnectionStrings__MyLaw: "Host=postgres;Port=5432;Database=mylaw;Username=postgres;Password=postgres"
+      ConnectionStrings__DainnStripe: "Host=postgres;Port=5432;Database=mylaw;Username=postgres;Password=postgres"
+      DainnUser__Database__ConnectionString: "Host=postgres;Port=5432;Database=mylaw;Username=postgres;Password=postgres"
+      DainnStripe__Database__ConnectionString: "Host=postgres;Port=5432;Database=mylaw;Username=postgres;Password=postgres"
       # Optional secrets — leave blank to disable feature
       DainnUser__Jwt__Secret: ${JWT_SECRET:-dev-only-not-for-production-please-replace-32chars}
       # Default values are Stripe's own well-known test placeholders — they
@@ -49,21 +49,40 @@ services:
       # Replace with real keys in .env for real billing flows.
       DainnStripe__SecretKey: ${STRIPE_SECRET:-stripe_placeholder_not_a_real_key}
       DainnStripe__WebhookSigningSecret: ${STRIPE_WEBHOOK_SECRET:-whsec_dev_placeholder_replace_me_in_env_file_for_real_webhooks}
+      EmbeddingService__BaseUrl: "http://embedding-service:8000"
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
       # Seed an admin account on first boot (AdminSeeder skips entries with
       # blank passwords). The default password meets PasswordComplexityAttribute
       # (>=8 chars, digit, uppercase, special). Override via .env.
-      Mindlex__Admins__0__FullName: ${ADMIN_FULLNAME:-Mindlex Dev Admin}
-      Mindlex__Admins__0__Email: ${ADMIN_EMAIL:-admin@mindlex.local}
-      Mindlex__Admins__0__Password: ${ADMIN_PASSWORD:-Admin123!}
+      MyLaw__Admins__0__FullName: ${ADMIN_FULLNAME:-MyLaw Dev Admin}
+      MyLaw__Admins__0__Email: ${ADMIN_EMAIL:-admin@mylaw.local}
+      MyLaw__Admins__0__Password: ${ADMIN_PASSWORD:-Admin123!}
     ports:
       - "8080:8080"
     restart: unless-stopped
+
+  embedding-service:
+    build:
+      context: ./embedding_service
+      dockerfile: Dockerfile
+    container_name: mylaw-embedding
+    volumes:
+      - huggingface_cache:/root/.cache/huggingface
+    ports:
+      - "8001:8000"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:8000/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 120s
 
   frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile
-    container_name: mindlex-frontend
+    container_name: mylaw-frontend
     depends_on:
       - backend
     ports:
@@ -71,4 +90,5 @@ services:
     restart: unless-stopped
 
 volumes:
-  mindlex_pgdata:
+  mylaw_pgdata:
+  huggingface_cache:

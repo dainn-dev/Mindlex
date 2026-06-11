@@ -1,0 +1,41 @@
+# docker-compose.embed.yml — Run the embedding pipeline in Docker
+#
+# Network strategy:
+#   The crawlerdb postgres container ("postgres") has no exposed host port and is
+#   disconnected from its docker network after a Docker Desktop restart. The embed
+#   container uses network_mode: "container:postgres" to share the crawlerdb's
+#   network namespace, making postgres reachable at 127.0.0.1:5432.
+#   The Mindlex postgres is reached via host.docker.internal on its host-mapped port
+#   (${POSTGRES_HOST_PORT:-55432} from the main docker-compose.yml).
+#
+# Prerequisites:
+#   Start Mindlex postgres first:
+#     docker compose up -d postgres
+#
+# Run (test with 10 records):
+#   docker compose -f scripts/docker-compose.embed.yml run --rm \
+#       embed-pipeline python embed_legal_data.py --batch-size 10 --limit 10
+#
+# Run (full pipeline):
+#   docker compose -f scripts/docker-compose.embed.yml up --build
+
+services:
+  embed-pipeline:
+    build:
+      context: ./scripts
+      dockerfile: Dockerfile.embed
+    # Share network namespace with crawlerdb container — postgres is at 127.0.0.1:5432
+    network_mode: "container:postgres"
+    environment:
+      # crawlerdb — reachable via loopback inside shared network namespace
+      CRAWL_DB_HOST: "127.0.0.1"
+      CRAWL_DB_PORT: "5432"
+      CRAWL_DB_NAME: "crawlerdb"
+      CRAWL_DB_USER: "crawler"
+      CRAWL_DB_PASS: "crawler"
+      # Mindlex postgres — exposed on host via docker-compose.yml POSTGRES_HOST_PORT (default 55432)
+      MINDLEX_DB_HOST: "host.docker.internal"
+      MINDLEX_DB_PORT: "${POSTGRES_HOST_PORT:-55432}"
+      MINDLEX_DB_NAME: "mylaw"
+      MINDLEX_DB_USER: "postgres"
+      MINDLEX_DB_PASS: "postgres"

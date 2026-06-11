@@ -2,7 +2,7 @@ using System.Text;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Wordprocessing;
 
-namespace Mindlex.Services.Documents;
+namespace MyLaw.Services.Documents;
 
 public sealed class UploadAnonymizerResult
 {

@@ -5,11 +5,11 @@ using DainnUser.Core.Interfaces.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Mindlex.Data;
-using Mindlex.Models;
-using Mindlex.Services;
+using MyLaw.Data;
+using MyLaw.Models;
+using MyLaw.Services;
 
-namespace Mindlex.Controllers;
+namespace MyLaw.Controllers;
 
 [ApiController]
 [Authorize]
@@ -23,13 +23,13 @@ public class NewsController : ControllerBase
 
     private readonly IRoleService _roles;
     private readonly IActivityService _activity;
-    private readonly MindlexDbContext _db;
+    private readonly MyLawDbContext _db;
     private readonly IConfiguration _config;
 
     public NewsController(
         IRoleService roles,
         IActivityService activity,
-        MindlexDbContext db,
+        MyLawDbContext db,
         IConfiguration config)
     {
         _roles = roles;
@@ -53,7 +53,7 @@ public class NewsController : ControllerBase
         var userId = CurrentUserId;
         if (userId is null) return Unauthorized();
 
-        var available = _config.GetSection("Mindlex:LegalNews:Topics").Get<string[]>() ?? Array.Empty<string>();
+        var available = _config.GetSection("MyLaw:LegalNews:Topics").Get<string[]>() ?? Array.Empty<string>();
         var roleNames = (await _roles.GetUserRolesAsync(userId.Value, ct)).Select(r => r.Name).ToList();
         var canEdit = roleNames.Any(r => string.Equals(r, RoleSeeder.PremiumRoleName, StringComparison.OrdinalIgnoreCase)
                                        || string.Equals(r, RoleSeeder.AdminRoleName, StringComparison.OrdinalIgnoreCase));
@@ -86,7 +86,7 @@ public class NewsController : ControllerBase
             });
         }
 
-        var available = (_config.GetSection("Mindlex:LegalNews:Topics").Get<string[]>() ?? Array.Empty<string>())
+        var available = (_config.GetSection("MyLaw:LegalNews:Topics").Get<string[]>() ?? Array.Empty<string>())
             .ToHashSet(StringComparer.OrdinalIgnoreCase);
 
         var invalid = req.Topics
@@ -127,7 +127,7 @@ public class NewsController : ControllerBase
         var userId = CurrentUserId;
         if (userId is null) return Unauthorized();
 
-        var maxArticles = _config.GetValue<int?>("Mindlex:LegalNews:MaxArticlesInFeed") ?? 50;
+        var maxArticles = _config.GetValue<int?>("MyLaw:LegalNews:MaxArticlesInFeed") ?? 50;
 
         var saved = await LoadSelectedTopicsAsync(userId.Value, ct);
         var topics = saved.Count > 0 ? saved : DefaultFeedTopics.ToList();
@@ -203,7 +203,7 @@ public class NewsController : ControllerBase
         var userId = CurrentUserId;
         if (userId is null) return Unauthorized();
 
-        var maxArticles = _config.GetValue<int?>("Mindlex:LegalNews:MaxArticlesInFeed") ?? 50;
+        var maxArticles = _config.GetValue<int?>("MyLaw:LegalNews:MaxArticlesInFeed") ?? 50;
 
         var saved = await LoadSelectedTopicsAsync(userId.Value, ct);
         var topics = saved.Count > 0 ? saved : DefaultFeedTopics.ToList();

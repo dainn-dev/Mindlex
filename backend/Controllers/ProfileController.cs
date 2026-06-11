@@ -11,10 +11,10 @@ using DainnUser.Core.Models.Profile;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Mindlex.Models;
-using Mindlex.Services;
+using MyLaw.Models;
+using MyLaw.Services;
 
-namespace Mindlex.Controllers;
+namespace MyLaw.Controllers;
 
 [ApiController]
 [Authorize]

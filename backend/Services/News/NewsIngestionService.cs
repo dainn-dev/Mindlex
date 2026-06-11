@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
-using Mindlex.Data;
+using MyLaw.Data;
 
-namespace Mindlex.Services.News;
+namespace MyLaw.Services.News;
 
 public sealed class NewsIngestionService : BackgroundService
 {
@@ -37,18 +37,18 @@ public sealed class NewsIngestionService : BackgroundService
 
     private DateTime ComputeNextRun(DateTime now)
     {
-        var hour = _config.GetValue<int?>("Mindlex:LegalNews:DailyRunHourUtc") ?? 4;
+        var hour = _config.GetValue<int?>("MyLaw:LegalNews:DailyRunHourUtc") ?? 4;
         var todaysRun = new DateTime(now.Year, now.Month, now.Day, hour, 0, 0, DateTimeKind.Utc);
         return now < todaysRun ? todaysRun : todaysRun.AddDays(1);
     }
 
     private async Task RunIngestAsync(CancellationToken ct)
     {
-        var lookbackDays = _config.GetValue<int?>("Mindlex:LegalNews:LookbackDays") ?? 30;
+        var lookbackDays = _config.GetValue<int?>("MyLaw:LegalNews:LookbackDays") ?? 30;
         var sinceUtc = DateTime.UtcNow.AddDays(-lookbackDays);
 
         using var scope = _services.CreateScope();
-        var db = scope.ServiceProvider.GetRequiredService<MindlexDbContext>();
+        var db = scope.ServiceProvider.GetRequiredService<MyLawDbContext>();
         var fetchers = scope.ServiceProvider.GetServices<INewsSourceFetcher>().ToList();
 
         var existingUrls = await db.NewsArticles

@@ -4,16 +4,16 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using Mindlex.Data;
+using MyLaw.Data;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace Mindlex.Migrations.Mindlex
+namespace MyLaw.Migrations.MyLaw
 {
-    [DbContext(typeof(MindlexDbContext))]
-    [Migration("20260515102721_InitialMindlexChat")]
-    partial class InitialMindlexChat
+    [DbContext(typeof(MyLawDbContext))]
+    [Migration("20260515102721_InitialMyLawChat")]
+    partial class InitialMyLawChat
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -25,7 +25,7 @@ namespace Mindlex.Migrations.Mindlex
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("Mindlex.Data.ChatMessage", b =>
+            modelBuilder.Entity("MyLaw.Data.ChatMessage", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -53,7 +53,7 @@ namespace Mindlex.Migrations.Mindlex
                     b.ToTable("ChatMessages");
                 });
 
-            modelBuilder.Entity("Mindlex.Data.ChatThread", b =>
+            modelBuilder.Entity("MyLaw.Data.ChatThread", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -84,9 +84,9 @@ namespace Mindlex.Migrations.Mindlex
                     b.ToTable("ChatThreads");
                 });
 
-            modelBuilder.Entity("Mindlex.Data.ChatMessage", b =>
+            modelBuilder.Entity("MyLaw.Data.ChatMessage", b =>
                 {
-                    b.HasOne("Mindlex.Data.ChatThread", "Thread")
+                    b.HasOne("MyLaw.Data.ChatThread", "Thread")
                         .WithMany("Messages")
                         .HasForeignKey("ThreadId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -95,7 +95,7 @@ namespace Mindlex.Migrations.Mindlex
                     b.Navigation("Thread");
                 });
 
-            modelBuilder.Entity("Mindlex.Data.ChatThread", b =>
+            modelBuilder.Entity("MyLaw.Data.ChatThread", b =>
                 {
                     b.Navigation("Messages");
                 });

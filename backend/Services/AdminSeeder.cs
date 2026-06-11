@@ -4,7 +4,7 @@ using DainnUser.Core.Models.Profile;
 using DainnUser.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 
-namespace Mindlex.Services;
+namespace MyLaw.Services;
 
 public sealed class AdminAccountOptions
 {
@@ -28,10 +28,10 @@ public sealed class AdminSeeder : IHostedService
 
     public async Task StartAsync(CancellationToken cancellationToken)
     {
-        var admins = _config.GetSection("Mindlex:Admins").Get<List<AdminAccountOptions>>() ?? new();
+        var admins = _config.GetSection("MyLaw:Admins").Get<List<AdminAccountOptions>>() ?? new();
         if (admins.Count == 0)
         {
-            _logger.LogWarning("No predefined admins configured under Mindlex:Admins; skipping admin seed.");
+            _logger.LogWarning("No predefined admins configured under MyLaw:Admins; skipping admin seed.");
             return;
         }
 

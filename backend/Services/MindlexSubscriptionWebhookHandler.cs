@@ -4,13 +4,13 @@ using DainnStripe.Entities;
 using DainnStripe.Interfaces;
 using DainnUser.Core.Interfaces.Services;
 using Microsoft.EntityFrameworkCore;
-using Mindlex.Controllers;
+using MyLaw.Controllers;
 using Stripe;
 using EmailAttachment = DainnUser.Core.Interfaces.Services.EmailAttachment;
 
-namespace Mindlex.Services;
+namespace MyLaw.Services;
 
-public sealed class MindlexSubscriptionWebhookHandler : IStripeWebhookHandler
+public sealed class MyLawSubscriptionWebhookHandler : IStripeWebhookHandler
 {
     private static readonly string[] SubscriptionEvents =
     {
@@ -24,15 +24,15 @@ public sealed class MindlexSubscriptionWebhookHandler : IStripeWebhookHandler
     private readonly IProfileService _profiles;
     private readonly IEmailService _email;
     private readonly IConfiguration _config;
-    private readonly ILogger<MindlexSubscriptionWebhookHandler> _logger;
+    private readonly ILogger<MyLawSubscriptionWebhookHandler> _logger;
 
-    public MindlexSubscriptionWebhookHandler(
+    public MyLawSubscriptionWebhookHandler(
         DainnStripeDbContext stripeDb,
         IRoleService roles,
         IProfileService profiles,
         IEmailService email,
         IConfiguration config,
-        ILogger<MindlexSubscriptionWebhookHandler> logger)
+        ILogger<MyLawSubscriptionWebhookHandler> logger)
     {
         _stripeDb = stripeDb;
         _roles = roles;
@@ -100,7 +100,7 @@ public sealed class MindlexSubscriptionWebhookHandler : IStripeWebhookHandler
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "MindlexSubscriptionWebhookHandler failed for event {EventType}", stripeEvent.Type);
+            _logger.LogError(ex, "MyLawSubscriptionWebhookHandler failed for event {EventType}", stripeEvent.Type);
             throw;
         }
     }
@@ -129,18 +129,18 @@ public sealed class MindlexSubscriptionWebhookHandler : IStripeWebhookHandler
         var safeName = WebUtility.HtmlEncode(fullName);
 
         var subject = tier == RoleSeeder.PremiumRoleName
-            ? "Welcome to Mindlex Premium – Your Subscription is Active"
-            : "Welcome to Mindlex Plus – Your Subscription is Active";
+            ? "Welcome to MyLaw Premium – Your Subscription is Active"
+            : "Welcome to MyLaw Plus – Your Subscription is Active";
 
-        var tierLabel = tier == RoleSeeder.PremiumRoleName ? "Mindlex Premium" : "Mindlex Plus";
-        var chatUrl = _config.GetValue<string>("Mindlex:ChatbotUrl") ?? "https://mindlex.ai/";
+        var tierLabel = tier == RoleSeeder.PremiumRoleName ? "MyLaw Premium" : "MyLaw Plus";
+        var chatUrl = _config.GetValue<string>("MyLaw:ChatbotUrl") ?? "https://mylaw.ai/";
 
         var htmlBody = $"""
             <p>Hi {safeName},</p>
             <p>Thank you for subscribing to {tierLabel}. Your payment was successful and your subscription is now active.</p>
             <p>You now have full access to {tierLabel}.</p>
             <p>If you have any questions, feel free to contact our support team.</p>
-            <p><a href="{WebUtility.HtmlEncode(chatUrl)}" style="display:inline-block;padding:10px 16px;background:#2563eb;color:#fff;text-decoration:none;border-radius:6px;">Start Using Mindlex</a></p>
+            <p><a href="{WebUtility.HtmlEncode(chatUrl)}" style="display:inline-block;padding:10px 16px;background:#2563eb;color:#fff;text-decoration:none;border-radius:6px;">Start Using MyLaw</a></p>
             """;
 
         try
@@ -173,7 +173,7 @@ public sealed class MindlexSubscriptionWebhookHandler : IStripeWebhookHandler
 
     private string? ResolveTierFromPriceId(string priceId)
     {
-        var plans = _config.GetSection("Mindlex:Plans").Get<List<PlanOptions>>() ?? new();
+        var plans = _config.GetSection("MyLaw:Plans").Get<List<PlanOptions>>() ?? new();
 
         foreach (var plan in plans)
         {

@@ -1,13 +1,13 @@
 using System.Text.RegularExpressions;
-using Mindlex.Data;
+using MyLaw.Data;
 
-namespace Mindlex.Services.News;
+namespace MyLaw.Services.News;
 
 /// <summary>
 /// Cylaw fetcher: scrapes the Cylaw "News &amp; Additions" listing page(s).
 /// Pages are static HTML; we extract anchor tags whose text or href maps to
 /// a case-law document. Listing URLs configured under
-///   Mindlex:LegalNews:FeedUrls:Cylaw (string[]).
+///   MyLaw:LegalNews:FeedUrls:Cylaw (string[]).
 /// </summary>
 public sealed class CylawFetcher : INewsSourceFetcher
 {
@@ -31,7 +31,7 @@ public sealed class CylawFetcher : INewsSourceFetcher
     public async Task<IReadOnlyList<NewsArticle>> FetchAsync(DateTime sinceUtc, CancellationToken ct)
     {
         var urls = _config
-            .GetSection("Mindlex:LegalNews:FeedUrls:Cylaw")
+            .GetSection("MyLaw:LegalNews:FeedUrls:Cylaw")
             .Get<string[]>() ?? Array.Empty<string>();
         if (urls.Length == 0)
         {
@@ -42,9 +42,9 @@ public sealed class CylawFetcher : INewsSourceFetcher
         var client = _httpClientFactory.CreateClient("news");
         client.Timeout = TimeSpan.FromSeconds(30);
         client.DefaultRequestHeaders.UserAgent.Clear();
-        client.DefaultRequestHeaders.UserAgent.ParseAdd("MindlexNewsBot/1.0 (+https://mindlex.ai)");
+        client.DefaultRequestHeaders.UserAgent.ParseAdd("MyLawNewsBot/1.0 (+https://mylaw.ai)");
 
-        var keywordsSection = _config.GetSection("Mindlex:ContentManagement:ClassificationKeywords").GetChildren();
+        var keywordsSection = _config.GetSection("MyLaw:ContentManagement:ClassificationKeywords").GetChildren();
         var topicKeywords = keywordsSection.ToDictionary(
             s => s.Key,
             s => s.Get<string[]>() ?? Array.Empty<string>(),

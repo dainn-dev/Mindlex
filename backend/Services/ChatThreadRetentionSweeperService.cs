@@ -1,9 +1,9 @@
 using DainnUser.Core.Interfaces.Services;
 using DainnUser.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
-using Mindlex.Data;
+using MyLaw.Data;
 
-namespace Mindlex.Services;
+namespace MyLaw.Services;
 
 public sealed class ChatThreadRetentionSweeperService : BackgroundService
 {
@@ -23,7 +23,7 @@ public sealed class ChatThreadRetentionSweeperService : BackgroundService
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        var intervalMinutes = _config.GetValue<int?>("Mindlex:Chatbot:RetentionSweepIntervalMinutes") ?? 30;
+        var intervalMinutes = _config.GetValue<int?>("MyLaw:Chatbot:RetentionSweepIntervalMinutes") ?? 30;
         var interval = TimeSpan.FromMinutes(intervalMinutes);
 
         while (!stoppingToken.IsCancellationRequested)
@@ -40,11 +40,11 @@ public sealed class ChatThreadRetentionSweeperService : BackgroundService
     {
         var now = DateTime.UtcNow;
         using var scope = _services.CreateScope();
-        var mindlexDb = scope.ServiceProvider.GetRequiredService<MindlexDbContext>();
+        var mylawDb = scope.ServiceProvider.GetRequiredService<MyLawDbContext>();
         var userDb = scope.ServiceProvider.GetRequiredService<DainnUserDbContext>();
         var roleService = scope.ServiceProvider.GetRequiredService<IRoleService>();
 
-        var threads = await mindlexDb.ChatThreads.AsNoTracking().ToListAsync(ct);
+        var threads = await mylawDb.ChatThreads.AsNoTracking().ToListAsync(ct);
         if (threads.Count == 0) return;
 
         var ownerIds = threads.Select(t => t.OwnerId).Distinct().ToList();
@@ -76,7 +76,7 @@ public sealed class ChatThreadRetentionSweeperService : BackgroundService
 
         if (toDelete.Count > 0)
         {
-            await mindlexDb.ChatThreads
+            await mylawDb.ChatThreads
                 .Where(t => toDelete.Contains(t.Id))
                 .ExecuteDeleteAsync(ct);
             _logger.LogInformation("Chat retention sweep deleted {Count} threads.", toDelete.Count);
@@ -85,7 +85,7 @@ public sealed class ChatThreadRetentionSweeperService : BackgroundService
 
     private TimeSpan GetRetentionForTier(string tier)
     {
-        var raw = _config.GetValue<string>($"Mindlex:Chatbot:RetentionPerTier:{tier}");
+        var raw = _config.GetValue<string>($"MyLaw:Chatbot:RetentionPerTier:{tier}");
         if (TimeSpan.TryParse(raw, out var ts)) return ts;
         return TimeSpan.FromMinutes(30);
     }

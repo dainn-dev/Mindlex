@@ -1,4 +1,4 @@
-namespace Mindlex.Services.Documents;
+namespace MyLaw.Services.Documents;
 
 public sealed record ComplianceIssue(
     string Name,

@@ -1,6 +1,6 @@
 using System.Text.RegularExpressions;
 
-namespace Mindlex.Services.Documents;
+namespace MyLaw.Services.Documents;
 
 public sealed record RiskIssue(
     string Name,

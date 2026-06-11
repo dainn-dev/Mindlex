@@ -8,12 +8,12 @@ using DainnUser.Core.Interfaces.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Mindlex.Models;
-using Mindlex.Services;
+using MyLaw.Models;
+using MyLaw.Services;
 using Stripe;
 using EmailAttachment = DainnUser.Core.Interfaces.Services.EmailAttachment;
 
-namespace Mindlex.Controllers;
+namespace MyLaw.Controllers;
 
 [ApiController]
 [Authorize]
@@ -72,10 +72,10 @@ public class SubscriptionController : ControllerBase
             .OrderByDescending(s => s.CreatedAt)
             .FirstOrDefaultAsync(ct);
 
-        var resolvedCurrency = (currency ?? _config.GetValue<string>("Mindlex:DefaultCurrency") ?? "EUR")
+        var resolvedCurrency = (currency ?? _config.GetValue<string>("MyLaw:DefaultCurrency") ?? "EUR")
             .ToUpperInvariant();
 
-        var plans = _config.GetSection("Mindlex:Plans").Get<List<PlanOptions>>() ?? new();
+        var plans = _config.GetSection("MyLaw:Plans").Get<List<PlanOptions>>() ?? new();
         var currentPlan = plans.FirstOrDefault(p =>
             string.Equals(p.Tier, currentTier, StringComparison.OrdinalIgnoreCase));
         var planPricing = currentPlan?.Pricing.TryGetValue(resolvedCurrency, out var pt) == true ? pt : null;
@@ -213,10 +213,10 @@ public class SubscriptionController : ControllerBase
 
         var htmlBody = $"""
             <p>Hi {safeName},</p>
-            <p>You've successfully cancelled your Mindlex {safeTier} subscription. You will continue to have access to {safeTier} features until {safeEndDate}.</p>
+            <p>You've successfully cancelled your MyLaw {safeTier} subscription. You will continue to have access to {safeTier} features until {safeEndDate}.</p>
             <p>No further charges will occur after this date.</p>
             <p>If this was a mistake, you can re-subscribe anytime from your Billing page.</p>
-            <p>Thanks,<br/>The Mindlex Team</p>
+            <p>Thanks,<br/>The MyLaw Team</p>
             """;
 
         try
@@ -224,7 +224,7 @@ public class SubscriptionController : ControllerBase
             await _email.SendEmailAsync(
                 profile.Email,
                 fullName,
-                "Your Mindlex Subscription Has Been Canceled",
+                "Your MyLaw Subscription Has Been Canceled",
                 htmlBody,
                 Array.Empty<EmailAttachment>(),
                 ct);
@@ -325,10 +325,10 @@ public class SubscriptionController : ControllerBase
 
         var htmlBody = $"""
             <p>Hi {safeName},</p>
-            <p>You've successfully scheduled a downgrade from your Mindlex Premium subscription to Mindlex Plus.</p>
+            <p>You've successfully scheduled a downgrade from your MyLaw Premium subscription to MyLaw Plus.</p>
             <p>Your Premium access will remain active until {safeEndDate}. After that, you will be charged the Plus plan rate and gain continued access to Plus features.</p>
             <p>If you have any questions, feel free to reach out.</p>
-            <p>— The Mindlex Team</p>
+            <p>— The MyLaw Team</p>
             """;
 
         try
@@ -336,7 +336,7 @@ public class SubscriptionController : ControllerBase
             await _email.SendEmailAsync(
                 profile.Email,
                 fullName,
-                "Your Mindlex Plan Will Downgrade to Plus",
+                "Your MyLaw Plan Will Downgrade to Plus",
                 htmlBody,
                 Array.Empty<EmailAttachment>(),
                 ct);
@@ -350,7 +350,7 @@ public class SubscriptionController : ControllerBase
     private string? ResolvePriceTier(string? priceId)
     {
         if (string.IsNullOrWhiteSpace(priceId)) return null;
-        var plans = _config.GetSection("Mindlex:Plans").Get<List<PlanOptions>>() ?? new();
+        var plans = _config.GetSection("MyLaw:Plans").Get<List<PlanOptions>>() ?? new();
         foreach (var plan in plans)
         {
             foreach (var pricing in plan.Pricing.Values)
@@ -367,7 +367,7 @@ public class SubscriptionController : ControllerBase
     {
         if (string.IsNullOrWhiteSpace(currentPremiumPriceId)) return (null, "", "");
 
-        var plans = _config.GetSection("Mindlex:Plans").Get<List<PlanOptions>>() ?? new();
+        var plans = _config.GetSection("MyLaw:Plans").Get<List<PlanOptions>>() ?? new();
         var premiumPlan = plans.FirstOrDefault(p =>
             string.Equals(p.Tier, RoleSeeder.PremiumRoleName, StringComparison.OrdinalIgnoreCase));
         var plusPlan = plans.FirstOrDefault(p =>

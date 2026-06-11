@@ -1,9 +1,9 @@
 using System.Globalization;
 using System.Net;
 using System.Xml.Linq;
-using Mindlex.Data;
+using MyLaw.Data;
 
-namespace Mindlex.Services.News;
+namespace MyLaw.Services.News;
 
 /// <summary>
 /// Base class for RSS / Atom feed-driven news source fetchers.
@@ -26,7 +26,7 @@ public abstract class RssFetcherBase : INewsSourceFetcher
 
     public abstract string SourceName { get; }
 
-    /// <summary>Configuration key under Mindlex:LegalNews:FeedUrls (e.g. "Bailii").</summary>
+    /// <summary>Configuration key under MyLaw:LegalNews:FeedUrls (e.g. "Bailii").</summary>
     protected abstract string FeedKey { get; }
 
     /// <summary>Map a (title + summary) blob to a list of canonical topic names.</summary>
@@ -34,7 +34,7 @@ public abstract class RssFetcherBase : INewsSourceFetcher
     {
         var lower = (title + " " + summary).ToLowerInvariant();
         var keywords = Config
-            .GetSection("Mindlex:ContentManagement:ClassificationKeywords")
+            .GetSection("MyLaw:ContentManagement:ClassificationKeywords")
             .GetChildren();
         foreach (var topic in keywords)
         {
@@ -47,12 +47,12 @@ public abstract class RssFetcherBase : INewsSourceFetcher
     public async Task<IReadOnlyList<NewsArticle>> FetchAsync(DateTime sinceUtc, CancellationToken ct)
     {
         var urls = Config
-            .GetSection($"Mindlex:LegalNews:FeedUrls:{FeedKey}")
+            .GetSection($"MyLaw:LegalNews:FeedUrls:{FeedKey}")
             .Get<string[]>() ?? Array.Empty<string>();
         if (urls.Length == 0)
         {
             Logger.LogInformation(
-                "{Source} fetcher: no feed URLs configured under Mindlex:LegalNews:FeedUrls:{Key}.",
+                "{Source} fetcher: no feed URLs configured under MyLaw:LegalNews:FeedUrls:{Key}.",
                 SourceName, FeedKey);
             return Array.Empty<NewsArticle>();
         }
@@ -60,7 +60,7 @@ public abstract class RssFetcherBase : INewsSourceFetcher
         var client = HttpClientFactory.CreateClient("news");
         client.Timeout = HttpTimeout;
         client.DefaultRequestHeaders.UserAgent.Clear();
-        client.DefaultRequestHeaders.UserAgent.ParseAdd("MindlexNewsBot/1.0 (+https://mindlex.ai)");
+        client.DefaultRequestHeaders.UserAgent.ParseAdd("MyLawNewsBot/1.0 (+https://mylaw.ai)");
 
         var articles = new List<NewsArticle>();
         foreach (var url in urls)

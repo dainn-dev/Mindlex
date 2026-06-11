@@ -2,7 +2,7 @@ using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Wordprocessing;
 
-namespace Mindlex.Services;
+namespace MyLaw.Services;
 
 public static class DocxBuilder
 {

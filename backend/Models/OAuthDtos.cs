@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
-using Mindlex.Validation;
+using MyLaw.Validation;
 
-namespace Mindlex.Models;
+namespace MyLaw.Models;
 
 public class SocialSignInRequest
 {

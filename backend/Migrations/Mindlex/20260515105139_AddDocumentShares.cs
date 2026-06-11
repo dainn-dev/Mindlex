@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace Mindlex.Migrations.Mindlex
+namespace MyLaw.Migrations.Mindlex
 {
     /// <inheritdoc />
     public partial class AddDocumentShares : Migration

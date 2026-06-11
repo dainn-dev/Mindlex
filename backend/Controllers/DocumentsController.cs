@@ -6,11 +6,11 @@ using DainnUser.Core.Interfaces.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Mindlex.Data;
-using Mindlex.Services;
+using MyLaw.Data;
+using MyLaw.Services;
 using EmailAttachment = DainnUser.Core.Interfaces.Services.EmailAttachment;
 
-namespace Mindlex.Controllers;
+namespace MyLaw.Controllers;
 
 [ApiController]
 [Authorize]
@@ -19,23 +19,23 @@ public class DocumentsController : ControllerBase
 {
     private const long MaxBytes = 25L * 1024 * 1024;
 
-    private readonly MindlexDbContext _db;
+    private readonly MyLawDbContext _db;
     private readonly IRoleService _roles;
     private readonly IProfileService _profiles;
     private readonly IEmailService _email;
-    private readonly Mindlex.Services.Documents.IDocumentClassifier _classifier;
-    private readonly Mindlex.Services.Documents.IUploadAnonymizer _uploadAnonymizer;
+    private readonly MyLaw.Services.Documents.IDocumentClassifier _classifier;
+    private readonly MyLaw.Services.Documents.IUploadAnonymizer _uploadAnonymizer;
     private readonly IActivityService _activity;
     private readonly IConfiguration _config;
     private readonly ILogger<DocumentsController> _logger;
 
     public DocumentsController(
-        MindlexDbContext db,
+        MyLawDbContext db,
         IRoleService roles,
         IProfileService profiles,
         IEmailService email,
-        Mindlex.Services.Documents.IDocumentClassifier classifier,
-        Mindlex.Services.Documents.IUploadAnonymizer uploadAnonymizer,
+        MyLaw.Services.Documents.IDocumentClassifier classifier,
+        MyLaw.Services.Documents.IUploadAnonymizer uploadAnonymizer,
         IActivityService activity,
         IConfiguration config,
         ILogger<DocumentsController> logger)
@@ -104,7 +104,7 @@ public class DocumentsController : ControllerBase
         var documentType = InferDocumentType(threadMessages.Last().Content);
         var sections = threadMessages.Select((m, i) => ((string Heading, string Body))($"Section {i + 1}", m.Content));
 
-        var docxBytes = DocxBuilder.BuildFromText($"Mindlex Draft – {documentType}", sections);
+        var docxBytes = DocxBuilder.BuildFromText($"MyLaw Draft – {documentType}", sections);
 
         if (docxBytes.LongLength > MaxBytes)
         {
@@ -256,7 +256,7 @@ public class DocumentsController : ControllerBase
         var documentType = InferDocumentType(threadMessages.Last().Content);
         var sections = threadMessages.Select((m, i) => ((string Heading, string Body))($"Section {i + 1}", m.Content));
 
-        var docxBytes = DocxBuilder.BuildFromText($"Mindlex Draft – {documentType}", sections);
+        var docxBytes = DocxBuilder.BuildFromText($"MyLaw Draft – {documentType}", sections);
         var fileName = $"{documentType.Replace(" ", "_")} - {DateTime.UtcNow:yyyyMMdd_HHmm}.docx";
 
         return File(docxBytes,
@@ -309,16 +309,16 @@ public class DocumentsController : ControllerBase
                 code = "upload_not_allowed"
             });
 
-        var maxBatch = _config.GetValue<int?>("Mindlex:ContentManagement:MaxFilesPerBatch") ?? 5;
+        var maxBatch = _config.GetValue<int?>("MyLaw:ContentManagement:MaxFilesPerBatch") ?? 5;
         if (files == null || files.Count == 0)
             return BadRequest(new { error = "No files provided." });
         if (files.Count > maxBatch)
             return BadRequest(new { error = $"You can only upload up to {maxBatch} files at once.", code = "batch_too_large" });
 
-        var maxFileBytes = _config.GetValue<long?>("Mindlex:ContentManagement:MaxFileBytes") ?? 26214400L;
-        var allowedExt = _config.GetSection("Mindlex:ContentManagement:AllowedExtensions").Get<string[]>()
+        var maxFileBytes = _config.GetValue<long?>("MyLaw:ContentManagement:MaxFileBytes") ?? 26214400L;
+        var allowedExt = _config.GetSection("MyLaw:ContentManagement:AllowedExtensions").Get<string[]>()
             ?? new[] { ".pdf", ".doc", ".docx", ".txt" };
-        var quotaBytes = _config.GetValue<long?>("Mindlex:ContentManagement:QuotaBytes") ?? 1073741824L;
+        var quotaBytes = _config.GetValue<long?>("MyLaw:ContentManagement:QuotaBytes") ?? 1073741824L;
 
         var currentUsage = await _db.SavedDocuments
             .Where(d => d.OwnerId == userId.Value)
@@ -501,7 +501,7 @@ public class DocumentsController : ControllerBase
 
         var now = DateTime.UtcNow;
         var expiresAt = now.AddDays(7);
-        var baseUrl = _config.GetValue<string>("Mindlex:DriveSharedUrlBase") ?? "https://mindlex.ai/shared";
+        var baseUrl = _config.GetValue<string>("MyLaw:DriveSharedUrlBase") ?? "https://mylaw.ai/shared";
 
         var sharesCreated = new List<object>();
         foreach (var recipient in normalized)
@@ -570,7 +570,7 @@ public class DocumentsController : ControllerBase
 
         var body = $"""
             <p>Hi {safeRecipient},</p>
-            <p>{safeSharer} has shared a legal document with you via the Mindlex platform.</p>
+            <p>{safeSharer} has shared a legal document with you via the MyLaw platform.</p>
             <p>You can access and download the file securely by clicking the link below:</p>
             <p><a href="{safeUrl}" style="display:inline-block;padding:10px 16px;background:#2563eb;color:#fff;text-decoration:none;border-radius:6px;">Access Document</a></p>
             <p>This link will remain active for 7 days. For your security, you will need to log in or authenticate your email before accessing the document.</p>
@@ -578,12 +578,12 @@ public class DocumentsController : ControllerBase
                <strong>Shared By:</strong> {safeSharer}<br/>
                <strong>Shared Date:</strong> {sharedAt:yyyy-MM-dd HH:mm} UTC</p>
             <p>If you believe this email was sent to you by mistake, you can safely ignore it.</p>
-            <p>Thank you,<br/>The Mindlex Team</p>
+            <p>Thank you,<br/>The MyLaw Team</p>
             """;
 
         await _email.SendEmailAsync(
             recipient, recipient,
-            "[Mindlex] You've been invited to access a shared document",
+            "[MyLaw] You've been invited to access a shared document",
             body,
             Array.Empty<EmailAttachment>(),
             ct);
@@ -602,11 +602,11 @@ public class DocumentsController : ControllerBase
                 code = "tag_edit_not_allowed"
             });
 
-        var maxTags = _config.GetValue<int?>("Mindlex:ContentManagement:MaxTagsPerDocument") ?? 2;
+        var maxTags = _config.GetValue<int?>("MyLaw:ContentManagement:MaxTagsPerDocument") ?? 2;
         if (req.Tags.Count > maxTags)
             return BadRequest(new { error = $"A document can have at most {maxTags} tags.", code = "too_many_tags" });
 
-        var allowed = _config.GetSection("Mindlex:ContentManagement:ClassificationKeywords")
+        var allowed = _config.GetSection("MyLaw:ContentManagement:ClassificationKeywords")
             .GetChildren()
             .Select(s => s.Key)
             .ToHashSet(StringComparer.OrdinalIgnoreCase);

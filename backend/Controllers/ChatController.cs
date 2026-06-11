@@ -1,15 +1,17 @@
+using System.Net.Http.Json;
 using System.Security.Claims;
+using System.Text;
 using System.Text.Json;
 using DainnUser.Core.Enums;
 using DainnUser.Core.Interfaces.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Mindlex.Data;
-using Mindlex.Models;
-using Mindlex.Services;
+using MyLaw.Data;
+using MyLaw.Models;
+using MyLaw.Services;
 
-namespace Mindlex.Controllers;
+namespace MyLaw.Controllers;
 
 [ApiController]
 [Authorize]
@@ -26,18 +28,22 @@ public class ChatController : ControllerBase
 
     private readonly IRoleService _roles;
     private readonly IActivityService _activity;
-    private readonly MindlexDbContext _db;
-    private readonly Mindlex.Services.Documents.IPiiSanitizer _piiSanitizer;
+    private readonly MyLawDbContext _db;
+    private readonly MyLaw.Services.Documents.IPiiSanitizer _piiSanitizer;
     private readonly IConfiguration _config;
     private readonly ILogger<ChatController> _logger;
+    private readonly ILegalSearchService _legalSearch;
+    private readonly IHttpClientFactory _httpFactory;
 
     public ChatController(
         IRoleService roles,
         IActivityService activity,
-        MindlexDbContext db,
-        Mindlex.Services.Documents.IPiiSanitizer piiSanitizer,
+        MyLawDbContext db,
+        MyLaw.Services.Documents.IPiiSanitizer piiSanitizer,
         IConfiguration config,
-        ILogger<ChatController> logger)
+        ILogger<ChatController> logger,
+        ILegalSearchService legalSearch,
+        IHttpClientFactory httpFactory)
     {
         _roles = roles;
         _activity = activity;
@@ -45,6 +51,8 @@ public class ChatController : ControllerBase
         _piiSanitizer = piiSanitizer;
         _config = config;
         _logger = logger;
+        _legalSearch = legalSearch;
+        _httpFactory = httpFactory;
     }
 
     private Guid? CurrentUserId
@@ -185,7 +193,7 @@ public class ChatController : ControllerBase
         {
             reply = _piiSanitizer.Sanitize(rawReply);
             anonymizedFields = _piiSanitizer.LastMatchCount;
-            anonymizationMessage = _config.GetValue<string>("Mindlex:Anonymization:ToastMessage")
+            anonymizationMessage = _config.GetValue<string>("MyLaw:Anonymization:ToastMessage")
                 ?? "All detected personal data has been successfully removed from your document.";
 
             try
@@ -215,8 +223,8 @@ public class ChatController : ControllerBase
         var sources = req.Mode == "drafting"
             ? new List<ChatSource>()
             : BuildSources(tier, jurisdiction);
-        var sourcesTitle = _config.GetValue<string>("Mindlex:Chatbot:SourcesTitle") ?? "Content supporting AI-generated response";
-        var disclaimer = _config.GetValue<string>("Mindlex:Chatbot:Disclaimer") ?? string.Empty;
+        var sourcesTitle = _config.GetValue<string>("MyLaw:Chatbot:SourcesTitle") ?? "Content supporting AI-generated response";
+        var disclaimer = _config.GetValue<string>("MyLaw:Chatbot:Disclaimer") ?? string.Empty;
 
         var metadata = JsonSerializer.Serialize(new
         {
@@ -447,7 +455,7 @@ public class ChatController : ControllerBase
         await file.CopyToAsync(ms, ct);
         var bytes = ms.ToArray();
 
-        var wordCount = Mindlex.Services.Documents.DocxTextExtractor.CountWords(bytes, ext);
+        var wordCount = MyLaw.Services.Documents.DocxTextExtractor.CountWords(bytes, ext);
         const int maxWords = 11000;
         if (wordCount > maxWords)
             return BadRequest(new
@@ -488,7 +496,7 @@ public class ChatController : ControllerBase
     public async Task<IActionResult> ComplianceCheck(
         Guid threadId,
         Guid uploadId,
-        [FromServices] Mindlex.Services.Documents.IComplianceChecker checker,
+        [FromServices] MyLaw.Services.Documents.IComplianceChecker checker,
         CancellationToken ct)
     {
         var userId = CurrentUserId;
@@ -509,7 +517,7 @@ public class ChatController : ControllerBase
         if (upload is null) return NotFound(new { error = "Upload not found." });
 
         var ext = Path.GetExtension(upload.FileName).ToLowerInvariant();
-        var text = Mindlex.Services.Documents.DocxTextExtractor.ExtractText(upload.Content, ext);
+        var text = MyLaw.Services.Documents.DocxTextExtractor.ExtractText(upload.Content, ext);
         var issues = checker.Check(text);
 
         return Ok(new
@@ -533,7 +541,7 @@ public class ChatController : ControllerBase
     public async Task<IActionResult> RiskCheck(
         Guid threadId,
         Guid uploadId,
-        [FromServices] Mindlex.Services.Documents.IRiskAnalyzer analyzer,
+        [FromServices] MyLaw.Services.Documents.IRiskAnalyzer analyzer,
         CancellationToken ct)
     {
         var userId = CurrentUserId;
@@ -554,7 +562,7 @@ public class ChatController : ControllerBase
         if (upload is null) return NotFound(new { error = "Upload not found." });
 
         var ext = Path.GetExtension(upload.FileName).ToLowerInvariant();
-        var text = Mindlex.Services.Documents.DocxTextExtractor.ExtractText(upload.Content, ext);
+        var text = MyLaw.Services.Documents.DocxTextExtractor.ExtractText(upload.Content, ext);
         var risks = analyzer.Analyze(text);
 
         return Ok(new
@@ -578,8 +586,8 @@ public class ChatController : ControllerBase
     public async Task<IActionResult> GenerateComplianceReport(
         Guid threadId,
         Guid uploadId,
-        [FromServices] Mindlex.Services.Documents.IComplianceChecker complianceChecker,
-        [FromServices] Mindlex.Services.Documents.IRiskAnalyzer riskAnalyzer,
+        [FromServices] MyLaw.Services.Documents.IComplianceChecker complianceChecker,
+        [FromServices] MyLaw.Services.Documents.IRiskAnalyzer riskAnalyzer,
         CancellationToken ct)
     {
         var userId = CurrentUserId;
@@ -600,7 +608,7 @@ public class ChatController : ControllerBase
         if (upload is null) return NotFound(new { error = "Upload not found." });
 
         var ext = Path.GetExtension(upload.FileName).ToLowerInvariant();
-        var text = Mindlex.Services.Documents.DocxTextExtractor.ExtractText(upload.Content, ext);
+        var text = MyLaw.Services.Documents.DocxTextExtractor.ExtractText(upload.Content, ext);
         var compliance = complianceChecker.Check(text);
         var risks = riskAnalyzer.Analyze(text);
 
@@ -645,8 +653,8 @@ public class ChatController : ControllerBase
             }
         }
 
-        var bytes = Mindlex.Services.DocxBuilder.BuildFromText(
-            $"Mindlex Compliance Report — {upload.FileName}",
+        var bytes = MyLaw.Services.DocxBuilder.BuildFromText(
+            $"MyLaw Compliance Report — {upload.FileName}",
             sections);
 
         var fileBase = Path.GetFileNameWithoutExtension(upload.FileName);
@@ -759,13 +767,13 @@ public class ChatController : ControllerBase
 
     private List<ChatSource> BuildSources(string tier, string jurisdiction)
     {
-        var cap = _config.GetValue<int?>($"Mindlex:Chatbot:MaxSources:{tier}") ?? 5;
+        var cap = _config.GetValue<int?>($"MyLaw:Chatbot:MaxSources:{tier}") ?? 5;
 
-        var allowedDomains = _config.GetSection("Mindlex:Chatbot:AllowedExternalDomains").Get<string[]>()
+        var allowedDomains = _config.GetSection("MyLaw:Chatbot:AllowedExternalDomains").Get<string[]>()
             ?? Array.Empty<string>();
 
-        var priority = _config.GetSection($"Mindlex:Chatbot:JurisdictionPriorities:{jurisdiction}").Get<string[]>()
-            ?? _config.GetSection("Mindlex:Chatbot:JurisdictionPriorities:Global").Get<string[]>()
+        var priority = _config.GetSection($"MyLaw:Chatbot:JurisdictionPriorities:{jurisdiction}").Get<string[]>()
+            ?? _config.GetSection("MyLaw:Chatbot:JurisdictionPriorities:Global").Get<string[]>()
             ?? Array.Empty<string>();
 
         var stub = new List<ChatSource>
@@ -807,13 +815,13 @@ public class ChatController : ControllerBase
         if (IsToxic(message))
         {
             var escalated = await RecordToxicAttemptAsync(userId, message, ct);
-            var disclaimer = _config.GetValue<string>("Mindlex:Chatbot:Disclaimer") ?? string.Empty;
+            var disclaimer = _config.GetValue<string>("MyLaw:Chatbot:Disclaimer") ?? string.Empty;
             return Ok(new
             {
                 blocked = true,
                 category = "toxic",
                 reply = "I'm sorry, but abusive language is not tolerated. " +
-                       "Per the Mindlex Terms of Service and Usage Policy, I can only respond to respectful, legal-related questions. " +
+                       "Per the MyLaw Terms of Service and Usage Policy, I can only respond to respectful, legal-related questions. " +
                        "If you have a legal question, please share it respectfully.",
                 escalated,
                 disclaimer
@@ -826,7 +834,7 @@ public class ChatController : ControllerBase
             {
                 category = "greeting",
                 reply = "Hi! I'm doing well, thank you. I'm here to help with legal questions — what would you like to ask?",
-                disclaimer = _config.GetValue<string>("Mindlex:Chatbot:Disclaimer") ?? string.Empty
+                disclaimer = _config.GetValue<string>("MyLaw:Chatbot:Disclaimer") ?? string.Empty
             });
         }
 
@@ -835,7 +843,7 @@ public class ChatController : ControllerBase
 
     private bool IsToxic(string message)
     {
-        var patterns = _config.GetSection("Mindlex:Chatbot:Safety:ToxicPatterns").Get<string[]>()
+        var patterns = _config.GetSection("MyLaw:Chatbot:Safety:ToxicPatterns").Get<string[]>()
             ?? Array.Empty<string>();
         return patterns.Any(p => System.Text.RegularExpressions.Regex.IsMatch(message,
             p, System.Text.RegularExpressions.RegexOptions.IgnoreCase));
@@ -843,7 +851,7 @@ public class ChatController : ControllerBase
 
     private bool IsGreeting(string message)
     {
-        var patterns = _config.GetSection("Mindlex:Chatbot:Safety:GreetingPatterns").Get<string[]>()
+        var patterns = _config.GetSection("MyLaw:Chatbot:Safety:GreetingPatterns").Get<string[]>()
             ?? Array.Empty<string>();
         return patterns.Any(p => System.Text.RegularExpressions.Regex.IsMatch(message,
             p, System.Text.RegularExpressions.RegexOptions.IgnoreCase));
@@ -851,8 +859,8 @@ public class ChatController : ControllerBase
 
     private async Task<bool> RecordToxicAttemptAsync(Guid userId, string message, CancellationToken ct)
     {
-        var threshold = _config.GetValue<int?>("Mindlex:Chatbot:Safety:EscalationThreshold") ?? 3;
-        var windowHours = _config.GetValue<int?>("Mindlex:Chatbot:Safety:EscalationWindowHours") ?? 24;
+        var threshold = _config.GetValue<int?>("MyLaw:Chatbot:Safety:EscalationThreshold") ?? 3;
+        var windowHours = _config.GetValue<int?>("MyLaw:Chatbot:Safety:EscalationWindowHours") ?? 24;
         var windowStart = DateTime.UtcNow.AddHours(-windowHours);
 
         await _activity.LogActivityAsync(
@@ -977,8 +985,8 @@ public class ChatController : ControllerBase
     private async Task<(int Limit, int Used, bool Allowed, DateTime ResetAt)> ComputeQuotaStateAsync(
         Guid userId, string tier, CancellationToken ct)
     {
-        var limit = _config.GetValue<int?>($"Mindlex:Chatbot:Quotas:{tier}") ?? 0;
-        var resetHour = _config.GetValue<int?>("Mindlex:Chatbot:DailyResetHourUtc") ?? 4;
+        var limit = _config.GetValue<int?>($"MyLaw:Chatbot:Quotas:{tier}") ?? 0;
+        var resetHour = _config.GetValue<int?>("MyLaw:Chatbot:DailyResetHourUtc") ?? 4;
 
         var now = DateTime.UtcNow;
         var todaysResetAt = new DateTime(now.Year, now.Month, now.Day, resetHour, 0, 0, DateTimeKind.Utc);
@@ -1032,27 +1040,131 @@ public class ChatController : ControllerBase
             .ToList();
     }
 
-    private Task<string> GenerateReplyAsync(
+    private async Task<string> GenerateReplyAsync(
         string userMessage,
         string tone,
         IReadOnlyList<ChatHistoryEntry> history,
         CancellationToken ct)
     {
-        var trimmed = userMessage.Trim();
-        if (trimmed.Length > 200) trimmed = trimmed[..200] + "...";
+        // 1. Semantic retrieval from pgvector
+        var results = await _legalSearch.SearchAsync(userMessage, topK: 5, ct);
 
-        var contextHint = history.Count > 0
-            ? $" (Follow-up: {history.Count} prior turn(s) supplied — LLM will use as context.)"
-            : string.Empty;
+        if (results.Count == 0)
+        {
+            return tone == TonePlain
+                ? "Không tìm thấy tài liệu pháp lý liên quan đến câu hỏi của bạn. " +
+                  "Vui lòng thử lại với từ khóa khác hoặc liên hệ với luật sư để được tư vấn."
+                : "No relevant legal documents found for this query. " +
+                  "Please refine your question or consult a qualified legal practitioner.";
+        }
 
-        var stub = tone == TonePlain
-            ? $"[Plain] You asked: \"{trimmed}\".{contextHint} " +
-              "In simple terms, the law is the set of rules that govern how people and organisations should behave. " +
-              "(LLM integration pending — system prompt will instruct plain-language responses without legal jargon.)"
-            : $"[Technical] Query: \"{trimmed}\".{contextHint} " +
-              "The relevant analysis would address statutory provisions, applicable case law, and doctrinal principles. " +
-              "(LLM integration pending — system prompt will instruct precise legal terminology with citations.)";
+        // 2. Build context block from retrieved documents
+        var ctx = new StringBuilder();
+        for (int i = 0; i < results.Count; i++)
+        {
+            var d = results[i];
+            ctx.AppendLine($"[{i + 1}] {d.Title}");
+            if (d.CaseNumber is not null) ctx.AppendLine($"    Case: {d.CaseNumber}");
+            if (d.Jurisdiction is not null) ctx.AppendLine($"    Jurisdiction: {d.Jurisdiction}");
+            ctx.AppendLine($"    URL: {d.SourceUrl}");
+            ctx.AppendLine($"    Excerpt: {d.Content}");
+            ctx.AppendLine();
+        }
 
-        return Task.FromResult(stub);
+        // 3. Try Claude API if key is configured
+        var apiKey = _config["Anthropic:ApiKey"];
+        if (string.IsNullOrWhiteSpace(apiKey))
+            apiKey = Environment.GetEnvironmentVariable("ANTHROPIC_API_KEY");
+
+        if (!string.IsNullOrWhiteSpace(apiKey))
+        {
+            try
+            {
+                return await CallClaudeAsync(apiKey, userMessage, tone, ctx.ToString(), history, ct);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Claude API call failed — falling back to citation response");
+            }
+        }
+
+        // 4. Fallback: structured citation response (no API key or Claude unavailable)
+        return BuildCitationResponse(results);
+    }
+
+    private async Task<string> CallClaudeAsync(
+        string apiKey,
+        string userMessage,
+        string tone,
+        string context,
+        IReadOnlyList<ChatHistoryEntry> history,
+        CancellationToken ct)
+    {
+        var model = _config["Anthropic:Model"] ?? "claude-sonnet-4-6";
+        var maxTokens = _config.GetValue("Anthropic:MaxTokens", 1024);
+
+        var toneInstruction = tone == TonePlain
+            ? "Trả lời bằng ngôn ngữ đơn giản, dễ hiểu cho người không chuyên luật. Tránh thuật ngữ pháp lý phức tạp."
+            : "Trả lời bằng ngôn ngữ pháp lý chính xác. Trích dẫn điều khoản, án lệ, và nguồn luật cụ thể.";
+
+        var systemPrompt =
+            "Bạn là trợ lý pháp lý AI chuyên về luật Cyprus và EU. " +
+            "Trả lời câu hỏi pháp lý dựa trên các tài liệu pháp lý được cung cấp. " +
+            "Luôn trích dẫn nguồn (URL). " +
+            "Trả lời bằng ngôn ngữ của câu hỏi (tiếng Việt, tiếng Anh, hoặc tiếng Hy Lạp). " +
+            "Nếu tài liệu cung cấp không đủ thông tin, hãy nói rõ ràng. " +
+            toneInstruction + "\n\n" +
+            "TÀI LIỆU PHÁP LÝ LIÊN QUAN:\n" + context;
+
+        var messages = history
+            .Select(h => new { role = h.Role, content = h.Content })
+            .Cast<object>()
+            .Append(new { role = "user", content = userMessage })
+            .ToList();
+
+        var requestBody = new
+        {
+            model,
+            max_tokens = maxTokens,
+            system = systemPrompt,
+            messages
+        };
+
+        var http = _httpFactory.CreateClient();
+        http.DefaultRequestHeaders.Add("x-api-key", apiKey);
+        http.DefaultRequestHeaders.Add("anthropic-version", "2023-06-01");
+
+        var response = await http.PostAsJsonAsync("https://api.anthropic.com/v1/messages", requestBody, ct);
+        response.EnsureSuccessStatusCode();
+
+        using var doc = await JsonDocument.ParseAsync(
+            await response.Content.ReadAsStreamAsync(ct), cancellationToken: ct);
+
+        return doc.RootElement
+            .GetProperty("content")[0]
+            .GetProperty("text")
+            .GetString() ?? string.Empty;
+    }
+
+    private static string BuildCitationResponse(List<LegalDocumentResult> results)
+    {
+        var sb = new StringBuilder();
+        sb.AppendLine($"Tìm thấy {results.Count} tài liệu pháp lý liên quan:");
+        sb.AppendLine();
+
+        for (int i = 0; i < results.Count; i++)
+        {
+            var d = results[i];
+            sb.AppendLine($"**{i + 1}. {d.Title}**");
+            if (d.CaseNumber is not null) sb.AppendLine($"Số vụ án: {d.CaseNumber}");
+            if (d.Jurisdiction is not null) sb.AppendLine($"Thẩm quyền: {d.Jurisdiction}");
+            sb.AppendLine($"Nguồn: {d.SourceUrl}");
+            sb.AppendLine($"> {d.Content}");
+            sb.AppendLine();
+        }
+
+        sb.AppendLine("*Để được tư vấn pháp lý chuyên sâu hơn, vui lòng liên hệ luật sư.*");
+        return sb.ToString();
     }
 }
+

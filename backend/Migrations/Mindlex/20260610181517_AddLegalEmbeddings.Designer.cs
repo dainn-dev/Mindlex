@@ -6,14 +6,15 @@ using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using MyLaw.Data;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
+using Pgvector;
 
 #nullable disable
 
 namespace MyLaw.Migrations.Mindlex
 {
     [DbContext(typeof(MyLawDbContext))]
-    [Migration("20260515105139_AddDocumentShares")]
-    partial class AddDocumentShares
+    [Migration("20260610181517_AddLegalEmbeddings")]
+    partial class AddLegalEmbeddings
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -23,9 +24,10 @@ namespace MyLaw.Migrations.Mindlex
                 .HasAnnotation("ProductVersion", "8.0.11")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
+            NpgsqlModelBuilderExtensions.HasPostgresExtension(modelBuilder, "vector");
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("Mindlex.Data.ChatMessage", b =>
+            modelBuilder.Entity("MyLaw.Data.ChatMessage", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -53,7 +55,7 @@ namespace MyLaw.Migrations.Mindlex
                     b.ToTable("ChatMessages");
                 });
 
-            modelBuilder.Entity("Mindlex.Data.ChatThread", b =>
+            modelBuilder.Entity("MyLaw.Data.ChatThread", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -84,7 +86,49 @@ namespace MyLaw.Migrations.Mindlex
                     b.ToTable("ChatThreads");
                 });
 
-            modelBuilder.Entity("Mindlex.Data.DocumentShare", b =>
+            modelBuilder.Entity("MyLaw.Data.ChatUpload", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<byte[]>("Content")
+                        .IsRequired()
+                        .HasColumnType("bytea");
+
+                    b.Property<string>("ContentType")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("FileName")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)");
+
+                    b.Property<Guid>("OwnerId")
+                        .HasColumnType("uuid");
+
+                    b.Property<long>("SizeBytes")
+                        .HasColumnType("bigint");
+
+                    b.Property<Guid>("ThreadId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("WordCount")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ThreadId");
+
+                    b.ToTable("ChatUploads");
+                });
+
+            modelBuilder.Entity("MyLaw.Data.DocumentShare", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -135,7 +179,56 @@ namespace MyLaw.Migrations.Mindlex
                     b.ToTable("DocumentShares");
                 });
 
-            modelBuilder.Entity("Mindlex.Data.NewsArticle", b =>
+            modelBuilder.Entity("MyLaw.Data.LegalDocument", b =>
+                {
+                    b.Property<long>("Id")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("CaseDate")
+                        .HasColumnType("text");
+
+                    b.Property<string>("CaseNumber")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Category")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("EmbeddedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Vector>("Embedding")
+                        .HasColumnType("vector");
+
+                    b.Property<string>("Jurisdiction")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Parties")
+                        .HasColumnType("text");
+
+                    b.Property<string>("SourceUrl")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Title")
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CaseNumber");
+
+                    b.HasIndex("Jurisdiction");
+
+                    b.ToTable("LegalDocuments");
+                });
+
+            modelBuilder.Entity("MyLaw.Data.NewsArticle", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -180,7 +273,7 @@ namespace MyLaw.Migrations.Mindlex
                     b.ToTable("NewsArticles");
                 });
 
-            modelBuilder.Entity("Mindlex.Data.NewsRead", b =>
+            modelBuilder.Entity("MyLaw.Data.NewsRead", b =>
                 {
                     b.Property<Guid>("UserId")
                         .HasColumnType("uuid");
@@ -198,7 +291,7 @@ namespace MyLaw.Migrations.Mindlex
                     b.ToTable("NewsReads");
                 });
 
-            modelBuilder.Entity("Mindlex.Data.SavedDocument", b =>
+            modelBuilder.Entity("MyLaw.Data.SavedDocument", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -263,9 +356,9 @@ namespace MyLaw.Migrations.Mindlex
                     b.ToTable("SavedDocuments");
                 });
 
-            modelBuilder.Entity("Mindlex.Data.ChatMessage", b =>
+            modelBuilder.Entity("MyLaw.Data.ChatMessage", b =>
                 {
-                    b.HasOne("Mindlex.Data.ChatThread", "Thread")
+                    b.HasOne("MyLaw.Data.ChatThread", "Thread")
                         .WithMany("Messages")
                         .HasForeignKey("ThreadId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -274,9 +367,20 @@ namespace MyLaw.Migrations.Mindlex
                     b.Navigation("Thread");
                 });
 
-            modelBuilder.Entity("Mindlex.Data.DocumentShare", b =>
+            modelBuilder.Entity("MyLaw.Data.ChatUpload", b =>
                 {
-                    b.HasOne("Mindlex.Data.SavedDocument", "Document")
+                    b.HasOne("MyLaw.Data.ChatThread", "Thread")
+                        .WithMany()
+                        .HasForeignKey("ThreadId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Thread");
+                });
+
+            modelBuilder.Entity("MyLaw.Data.DocumentShare", b =>
+                {
+                    b.HasOne("MyLaw.Data.SavedDocument", "Document")
                         .WithMany()
                         .HasForeignKey("DocumentId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -285,7 +389,7 @@ namespace MyLaw.Migrations.Mindlex
                     b.Navigation("Document");
                 });
 
-            modelBuilder.Entity("Mindlex.Data.ChatThread", b =>
+            modelBuilder.Entity("MyLaw.Data.ChatThread", b =>
                 {
                     b.Navigation("Messages");
                 });

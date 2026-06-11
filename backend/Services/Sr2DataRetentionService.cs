@@ -8,12 +8,12 @@ using DainnUser.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using EmailAttachment = DainnUser.Core.Interfaces.Services.EmailAttachment;
 
-namespace Mindlex.Services;
+namespace MyLaw.Services;
 
 public sealed class Sr2DataRetentionService
 {
     public const string PartialDeleteMarker = "sr2_partial_delete";
-    public const string TombstoneEmailSuffix = "@mindlex.deleted";
+    public const string TombstoneEmailSuffix = "@mylaw.deleted";
     public const int RetentionYears = 12;
 
     private readonly DainnUserDbContext _userDb;
@@ -183,16 +183,16 @@ public sealed class Sr2DataRetentionService
 
         var body = $"""
             <p>Hi {safeName},</p>
-            <p>Your Mindlex account has been deleted in line with our data retention policy.</p>
+            <p>Your MyLaw account has been deleted in line with our data retention policy.</p>
             <p>Because your account has prior paid subscription activity, a minimal record (full name, email, invoices) is retained for {RetentionYears} years to meet tax and VAT compliance obligations. All other personal data — including chat history, drafted documents, uploaded files, and preferences — has been permanently deleted.</p>
-            <p>You are welcome to register a new Mindlex account at any time with the same email address. No historical data will be restored.</p>
-            <p>Thank you for using Mindlex.</p>
-            <p>– The Mindlex Team</p>
+            <p>You are welcome to register a new MyLaw account at any time with the same email address. No historical data will be restored.</p>
+            <p>Thank you for using MyLaw.</p>
+            <p>– The MyLaw Team</p>
             """;
 
         await _email.SendEmailAsync(
             toEmail, displayName,
-            "Your Mindlex account has been deleted",
+            "Your MyLaw account has been deleted",
             body,
             Array.Empty<EmailAttachment>(),
             ct);

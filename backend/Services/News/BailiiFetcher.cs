@@ -1,13 +1,13 @@
 using System.Text.RegularExpressions;
-using Mindlex.Data;
+using MyLaw.Data;
 
-namespace Mindlex.Services.News;
+namespace MyLaw.Services.News;
 
 /// <summary>
 /// BAILII (British and Irish Legal Information Institute) news fetcher.
 ///
 /// BAILII publishes Atom feeds per-court at /cgi-bin/atom.cgi?path=...
-/// Example feeds configured under Mindlex:LegalNews:FeedUrls:Bailii:
+/// Example feeds configured under MyLaw:LegalNews:FeedUrls:Bailii:
 ///   - https://www.bailii.org/cgi-bin/atom.cgi?path=ew/cases/UKSC
 ///   - https://www.bailii.org/cgi-bin/atom.cgi?path=ew/cases/EWCA
 ///

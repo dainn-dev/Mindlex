@@ -6,10 +6,10 @@ using DainnUser.Core.Interfaces.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Mindlex.Services;
+using MyLaw.Services;
 using Stripe;
 
-namespace Mindlex.Controllers;
+namespace MyLaw.Controllers;
 
 [ApiController]
 [Authorize]
@@ -163,7 +163,7 @@ public class BillingController : ControllerBase
     {
         if (string.IsNullOrWhiteSpace(priceId)) return null;
 
-        var plans = _config.GetSection("Mindlex:Plans").Get<List<PlanOptions>>() ?? new();
+        var plans = _config.GetSection("MyLaw:Plans").Get<List<PlanOptions>>() ?? new();
         foreach (var plan in plans)
         {
             foreach (var pricing in plan.Pricing.Values)
@@ -208,7 +208,7 @@ public class BillingController : ControllerBase
         {
             var sub = ResolveSubscriptionForPayment(p, subscriptions);
             var planLabel = sub is null ? null : BuildPlanLabel(sub.StripePriceId);
-            var mindlexStatus = MapStatus(p.Status);
+            var mylawStatus = MapStatus(p.Status);
 
             return new
             {
@@ -219,9 +219,9 @@ public class BillingController : ControllerBase
                 amount = p.Amount / 100m,
                 amountDisplay = FormatAmount(p.Amount, p.Currency),
                 currency = p.Currency,
-                status = mindlexStatus,
-                isPaid = mindlexStatus == "Paid",
-                invoiceDownloadUrl = mindlexStatus == "Paid"
+                status = mylawStatus,
+                isPaid = mylawStatus == "Paid",
+                invoiceDownloadUrl = mylawStatus == "Paid"
                     ? $"/api/billing/payments/{p.Id}/invoice-pdf"
                     : null
             };
@@ -314,7 +314,7 @@ public class BillingController : ControllerBase
     {
         if (string.IsNullOrWhiteSpace(priceId)) return null;
 
-        var plans = _config.GetSection("Mindlex:Plans").Get<List<PlanOptions>>() ?? new();
+        var plans = _config.GetSection("MyLaw:Plans").Get<List<PlanOptions>>() ?? new();
         foreach (var plan in plans)
         {
             foreach (var pricing in plan.Pricing.Values)

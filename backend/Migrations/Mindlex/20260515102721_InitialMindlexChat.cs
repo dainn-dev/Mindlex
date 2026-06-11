@@ -3,10 +3,10 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace Mindlex.Migrations.Mindlex
+namespace MyLaw.Migrations.MyLaw
 {
     /// <inheritdoc />
-    public partial class InitialMindlexChat : Migration
+    public partial class InitialMyLawChat : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

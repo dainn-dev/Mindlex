@@ -1,6 +1,6 @@
 using System.Text;
 
-namespace Mindlex.Services.Documents;
+namespace MyLaw.Services.Documents;
 
 public sealed class KeywordDocumentClassifier : IDocumentClassifier
 {
@@ -17,7 +17,7 @@ public sealed class KeywordDocumentClassifier : IDocumentClassifier
     {
         try
         {
-            var map = _config.GetSection("Mindlex:ContentManagement:ClassificationKeywords")
+            var map = _config.GetSection("MyLaw:ContentManagement:ClassificationKeywords")
                 .GetChildren()
                 .ToDictionary(s => s.Key, s => s.Get<string[]>() ?? Array.Empty<string>(),
                               StringComparer.OrdinalIgnoreCase);

@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Mindlex.Controllers;
+namespace MyLaw.Controllers;
 
 public sealed class PriceTier
 {
@@ -34,9 +34,9 @@ public class PlansController : ControllerBase
     [HttpGet]
     public IActionResult List([FromQuery] string? currency = null)
     {
-        var supported = _config.GetSection("Mindlex:SupportedCurrencies").Get<string[]>()
+        var supported = _config.GetSection("MyLaw:SupportedCurrencies").Get<string[]>()
             ?? new[] { "EUR", "GBP", "USD" };
-        var defaultCurrency = _config.GetValue<string>("Mindlex:DefaultCurrency") ?? "EUR";
+        var defaultCurrency = _config.GetValue<string>("MyLaw:DefaultCurrency") ?? "EUR";
 
         var requested = (currency ?? defaultCurrency).ToUpperInvariant();
         if (!supported.Contains(requested, StringComparer.OrdinalIgnoreCase))
@@ -48,7 +48,7 @@ public class PlansController : ControllerBase
             });
         }
 
-        var plans = _config.GetSection("Mindlex:Plans").Get<List<PlanOptions>>() ?? new();
+        var plans = _config.GetSection("MyLaw:Plans").Get<List<PlanOptions>>() ?? new();
 
         var display = plans.Select(p =>
         {

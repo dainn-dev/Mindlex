@@ -4,10 +4,10 @@ using DainnUser.Core.Models.Profile;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
-using Mindlex.Models;
-using Mindlex.Services;
+using MyLaw.Models;
+using MyLaw.Services;
 
-namespace Mindlex.Controllers;
+namespace MyLaw.Controllers;
 
 [ApiController]
 [Route("api/auth")]

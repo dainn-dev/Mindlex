@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace Mindlex.Validation;
+namespace MyLaw.Validation;
 
 [AttributeUsage(AttributeTargets.Property)]
 public sealed class MinimumAgeAttribute : ValidationAttribute
@@ -24,7 +24,7 @@ public sealed class MinimumAgeAttribute : ValidationAttribute
         return age >= Years
             ? ValidationResult.Success
             : new ValidationResult(
-                $"You must be at least {Years} years old to register for a Mindlex Account.",
+                $"You must be at least {Years} years old to register for a MyLaw Account.",
                 new[] { ctx.MemberName ?? string.Empty });
     }
 }

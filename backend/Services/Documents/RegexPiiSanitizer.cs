@@ -1,6 +1,6 @@
 using System.Text.RegularExpressions;
 
-namespace Mindlex.Services.Documents;
+namespace MyLaw.Services.Documents;
 
 public sealed class RegexPiiSanitizer : IPiiSanitizer
 {
@@ -20,8 +20,8 @@ public sealed class RegexPiiSanitizer : IPiiSanitizer
         LastMatchCount = 0;
         if (string.IsNullOrWhiteSpace(input)) return input;
 
-        var placeholder = _config.GetValue<string>("Mindlex:Anonymization:Placeholder") ?? "[.............]";
-        var patterns = _config.GetSection("Mindlex:Anonymization:PiiPatterns").GetChildren()
+        var placeholder = _config.GetValue<string>("MyLaw:Anonymization:Placeholder") ?? "[.............]";
+        var patterns = _config.GetSection("MyLaw:Anonymization:PiiPatterns").GetChildren()
             .Select(c => c.Value)
             .Where(v => !string.IsNullOrWhiteSpace(v))
             .ToList();

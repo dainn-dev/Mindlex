@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace Mindlex.Migrations.Mindlex
+namespace MyLaw.Migrations.MyLaw
 {
     /// <inheritdoc />
     public partial class AddNewsArticles : Migration

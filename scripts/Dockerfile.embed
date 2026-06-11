@@ -1,0 +1,29 @@
+FROM python:3.11-slim
+
+WORKDIR /app
+
+# System deps for psycopg2
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libpq-dev gcc \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY requirements.txt .
+# CPU-only torch saves ~2 GB vs the default GPU wheel
+RUN pip install --no-cache-dir torch --index-url https://download.pytorch.org/whl/cpu \
+    && pip install --no-cache-dir -r requirements.txt
+
+COPY embed_legal_data.py .
+
+# Pre-download intfloat/multilingual-e5-small at build time.
+# At runtime the container shares the crawlerdb network namespace (no internet).
+# Run with HF_HUB_OFFLINE=0 here so the download actually happens during build.
+RUN CUDA_VISIBLE_DEVICES="" HF_HUB_OFFLINE=0 TRANSFORMERS_OFFLINE=0 \
+    python -c "from sentence_transformers import SentenceTransformer; \
+               SentenceTransformer('intfloat/multilingual-e5-small', device='cpu')"
+
+# At runtime, stay offline — model is baked in (or mounted via -v).
+ENV HF_HUB_OFFLINE=1
+ENV TRANSFORMERS_OFFLINE=1
+ENV CUDA_VISIBLE_DEVICES=""
+
+CMD ["python", "embed_legal_data.py", "--batch-size", "100"]

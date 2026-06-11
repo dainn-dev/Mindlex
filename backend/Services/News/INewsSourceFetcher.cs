@@ -1,6 +1,6 @@
-using Mindlex.Data;
+using MyLaw.Data;
 
-namespace Mindlex.Services.News;
+namespace MyLaw.Services.News;
 
 public interface INewsSourceFetcher
 {

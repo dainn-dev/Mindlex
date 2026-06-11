@@ -4,14 +4,14 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using Mindlex.Data;
+using MyLaw.Data;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace Mindlex.Migrations.Mindlex
+namespace MyLaw.Migrations.MyLaw
 {
-    [DbContext(typeof(MindlexDbContext))]
+    [DbContext(typeof(MyLawDbContext))]
     [Migration("20260515104830_ExtendSavedDocuments")]
     partial class ExtendSavedDocuments
     {

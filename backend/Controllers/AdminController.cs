@@ -11,14 +11,13 @@ using DainnUser.Infrastructure.Data;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Mindlex.Controllers;
-using Mindlex.Data;
-using Mindlex.Models;
-using Mindlex.Services;
+using MyLaw.Data;
+using MyLaw.Models;
+using MyLaw.Services;
 using Stripe;
 using EmailAttachment = DainnUser.Core.Interfaces.Services.EmailAttachment;
 
-namespace Mindlex.Controllers;
+namespace MyLaw.Controllers;
 
 [ApiController]
 [Authorize(Roles = RoleSeeder.AdminRoleName)]
@@ -34,7 +33,7 @@ public class AdminController : ControllerBase
     private readonly IEmailService _email;
     private readonly DainnStripeDbContext _stripeDb;
     private readonly DainnUserDbContext _userDb;
-    private readonly MindlexDbContext _mindlexDb;
+    private readonly MyLawDbContext _mindlexDb;
     private readonly Sr2DataRetentionService _retention;
     private readonly IConfiguration _config;
     private readonly ILogger<AdminController> _logger;
@@ -49,7 +48,7 @@ public class AdminController : ControllerBase
         IEmailService email,
         DainnStripeDbContext stripeDb,
         DainnUserDbContext userDb,
-        MindlexDbContext mindlexDb,
+        MyLawDbContext mindlexDb,
         Sr2DataRetentionService retention,
         IConfiguration config,
         ILogger<AdminController> logger)

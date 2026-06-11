@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace Mindlex.Controllers;
+namespace MyLaw.Controllers;
 
 public class RenameDocumentRequest
 {

@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace Mindlex.Models;
+namespace MyLaw.Models;
 
 public class StartSubscriptionRequest
 {

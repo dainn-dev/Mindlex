@@ -8,7 +8,7 @@ using DainnUser.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using EmailAttachment = DainnUser.Core.Interfaces.Services.EmailAttachment;
 
-namespace Mindlex.Services;
+namespace MyLaw.Services;
 
 public sealed class InactiveAccountSweeperService : BackgroundService
 {
@@ -31,7 +31,7 @@ public sealed class InactiveAccountSweeperService : BackgroundService
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        var intervalHours = _config.GetValue<int?>("Mindlex:Lifecycle:SweepIntervalHours") ?? 24;
+        var intervalHours = _config.GetValue<int?>("MyLaw:Lifecycle:SweepIntervalHours") ?? 24;
         var interval = TimeSpan.FromHours(intervalHours);
 
         while (!stoppingToken.IsCancellationRequested)
@@ -52,8 +52,8 @@ public sealed class InactiveAccountSweeperService : BackgroundService
 
     private async Task RunSweepAsync(CancellationToken ct)
     {
-        var warningMonths = _config.GetValue<int?>("Mindlex:Lifecycle:InactivityWarningMonths") ?? 24;
-        var graceDays = _config.GetValue<int?>("Mindlex:Lifecycle:DeletionGraceDays") ?? 30;
+        var warningMonths = _config.GetValue<int?>("MyLaw:Lifecycle:InactivityWarningMonths") ?? 24;
+        var graceDays = _config.GetValue<int?>("MyLaw:Lifecycle:DeletionGraceDays") ?? 30;
 
         var now = DateTime.UtcNow;
         var inactivityThreshold = now.AddMonths(-warningMonths);
@@ -201,23 +201,23 @@ public sealed class InactiveAccountSweeperService : BackgroundService
         var profile = await profiles.GetProfileAsync(user.Id, ct);
         var fullName = profile?.DisplayName ?? user.Username ?? user.Email;
         var safeName = WebUtility.HtmlEncode(fullName);
-        var loginUrl = _config.GetValue<string>("Mindlex:LoginUrl") ?? "https://mindlex.ai/login";
+        var loginUrl = _config.GetValue<string>("MyLaw:LoginUrl") ?? "https://mylaw.ai/login";
         var safeLoginUrl = WebUtility.HtmlEncode(loginUrl);
         var deletionDateText = deletionDate.ToString("yyyy-MM-dd");
 
         var body = $"""
             <p>Hi {safeName},</p>
-            <p>We noticed that you haven't logged into your Mindlex account in over 24 months.</p>
+            <p>We noticed that you haven't logged into your MyLaw account in over 24 months.</p>
             <p>To keep our system secure and up-to-date, inactive accounts are automatically removed. Your account is scheduled to be deleted in 30 days if no activity is detected.</p>
             <p>If you'd like to keep your account, simply log in before {deletionDateText}.</p>
-            <p><a href="{safeLoginUrl}" style="display:inline-block;padding:10px 16px;background:#2563eb;color:#fff;text-decoration:none;border-radius:6px;">Login to Mindlex</a></p>
+            <p><a href="{safeLoginUrl}" style="display:inline-block;padding:10px 16px;background:#2563eb;color:#fff;text-decoration:none;border-radius:6px;">Login to MyLaw</a></p>
             <p>If you do not log in within the next 30 days, your account and personal data will be permanently deleted.</p>
-            <p>Thank you,<br/>The Mindlex Team</p>
+            <p>Thank you,<br/>The MyLaw Team</p>
             """;
 
         await email.SendEmailAsync(
             user.Email, fullName,
-            "Your Mindlex account is scheduled for deletion in 30 days",
+            "Your MyLaw account is scheduled for deletion in 30 days",
             body,
             Array.Empty<EmailAttachment>(),
             ct);
@@ -236,17 +236,17 @@ public sealed class InactiveAccountSweeperService : BackgroundService
         var safeName = WebUtility.HtmlEncode(fullName);
 
         var body = $"""
-            <h2>Your Mindlex account has been permanently deleted</h2>
+            <h2>Your MyLaw account has been permanently deleted</h2>
             <p>Hi {safeName},</p>
-            <p>As noted in our previous reminder, your Mindlex account has been inactive for over 24 months. Since no login occurred within the past 30 days, your account has now been permanently deleted as part of our data retention policy.</p>
-            <p>If you wish to use Mindlex in the future, you are welcome to create a new account at any time.</p>
-            <p>Thank you for using Mindlex.</p>
-            <p>– The Mindlex Team</p>
+            <p>As noted in our previous reminder, your MyLaw account has been inactive for over 24 months. Since no login occurred within the past 30 days, your account has now been permanently deleted as part of our data retention policy.</p>
+            <p>If you wish to use MyLaw in the future, you are welcome to create a new account at any time.</p>
+            <p>Thank you for using MyLaw.</p>
+            <p>– The MyLaw Team</p>
             """;
 
         await email.SendEmailAsync(
             user.Email, fullName,
-            "Your Mindlex account has been deleted due to inactivity",
+            "Your MyLaw account has been deleted due to inactivity",
             body,
             Array.Empty<EmailAttachment>(),
             ct);
